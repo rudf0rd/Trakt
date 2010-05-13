@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<settings>
+  <setting type="lsep" label="30011" />
+  <setting id="RunBackground" type="bool" label="30029" default="true" />
+  <setting id="AutoStart" type="bool" label="30012" default="false" visible= "eq(-1,true)" enable="eq(-1,true)" />
+  <setting id="OAuth" type="bool" label="30030" default="true" />
+  <setting id="Username" type="text" label="30013" default="" />
+  <setting id="Password" type="text" option="hidden" visible="eq(-2,false)" enable="eq(-2,false)" label="30015" default="" />
+
+  <setting type="lsep" label="30016" />
+  <setting id="AutoTweetVideo" type="bool" label="30017" default="true" />
+  <setting id="MovieTweet" type="text" label="30023" default="Watching %MOVIETITLE% (%MOVIEYEAR%)" visible= "eq(-1,true)" enable="eq(-1,true)" />
+  <setting id="TVShowTweet" type="text" label="30022" default="Watching %SHOWNAME%, Season: %SEASON%, Episode: %EPISODENAME%" visible= "eq(-2,true)" enable="eq(-2,true)" />
+  <setting id="VideoThreshold" type="enum"  visible= "eq(-3,true)" enable="eq(-3,true)" label="30033" values="1%|5%|15%|50%|75%|95%" default="3" />
+  <setting id="AutoTweetMusic" type="bool" label="30019" default="true" />
+  <setting id="MusicTweet" type="text" label="30024" default="Listening to %ARTISTNAME% (%ALBUMTITLE%)" visible= "eq(-1,true)" enable="eq(-1,true)" />
+  <setting id="MusicThreshold" type="enum"  visible= "eq(-2,true)" enable="eq(-2,true)" label="30035" values="1%|5%|15%|50%|75%|95%" default="3" />
+  <setting id="AddBitly" type="bool" label="30032" default="true" />
+  <setting id="TagsTweet" type="text" label="30014" default="#xbmc #xbtweet #nowplaying" />
+
+  <setting type="lsep" label="Timeline Notifications" />
+  <setting id="UseAnotherAccount" type="bool" option="hidden" visible="eq(-14,false)" enable="eq(-14,false)" label="30054" default="false" />
+  <setting id="Username2" type="text" label="30013" default="" visible="eq(-1,true) + eq(-15,false)" enable="eq(-1,true) + eq(-15,false)" />
+  <setting id="Password2" type="text" option="hidden" visible="eq(-2,true) + eq(-16,false)" enable="eq(-2,true) + eq(-16,false)" label="30015" default="" />
+  <setting id="NotifyInterval" type="enum" label="30046" values="3|5|10|60|120|180" default="2" />
+  <setting id="NotifyTimeline" type="bool" label="30047" default="true" />
+  <setting id="NotifyMention" type="bool" label="30048" default="true" />
+  <setting id="NotifyDirect" type="bool" label="30049" default="true" />
+
+  <setting type="lsep" label="30036" />
+  <setting id="OnlyLibrary" type="bool" label="30037" default="true" />
+  <setting id="ExcludeAdult" type="bool" label="30038" default="true" />
+  <setting id="ExcludePathOption" type="bool" label="30031" default="false" />
+  <setting id="ExcludePath" type="folder" source="files" label="30039" default="" visible= "eq(-1,true)" enable="eq(-1,true)" />
+  <setting id="ExcludePathOption2" type="bool" label="30031" default="false" />
+  <setting id="ExcludePath2" type="folder" source="files" label="30039" default="" visible= "eq(-1,true)" enable="eq(-1,true)" />
+  <setting id="ExcludePathOption3" type="bool" label="30031" default="false" />
+  <setting id="ExcludePath3" type="folder" source="files" label="30039" default="" visible= "eq(-1,true)" enable="eq(-1,true)" />
+
+  <setting type="lsep" label="30025" />
+  <setting id="showwhatsnew" type="bool" label="30045" default="true" />
+  <setting id="new_ver" type="bool" label="30027" default="true" />
+  <setting id="followauthor" type="bool" label="30028" default="false" />
+  <setting id="debug" type="bool" label="30026" default="true" />
+</settings>
