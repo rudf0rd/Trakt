@@ -142,6 +142,8 @@ __settings__ = xbmc.Settings( path=os.getcwd() )
 bRun = True #Enter idle state waiting to submit
 bStartup = False
 bShortcut = False
+bUsername = False
+bPassword = False
 lasttitle = ""
 
 bAutoStart = False
@@ -151,7 +153,10 @@ VideoThreshold = 0
 
 if (__settings__.getSetting( "AutoStart" ) == 'true'): bAutoStart = True
 if (__settings__.getSetting( "RunBackground" ) == 'true'): bRunBackground = True
-if (__settings__.getSetting( "AutoTweetVideo" ) == 'true'): bAutoSubmitVideo = True
+if (__settings__.getSetting( "AutoSubmitVideo" ) == 'true'): bAutoSubmitVideo = True
+
+bUsername = __settings__.getSetting( "Username" )
+bPassword = __settings__.getSetting( "Password" )
 
 VideoThreshold = int(__settings__.getSetting( "VideoThreshold" ))
 if (VideoThreshold == 0): VideoThreshold = 1
@@ -166,30 +171,22 @@ bFirstRun = CheckIfFirstRun()
 try:
     count = len(sys.argv) - 1
     if (sys.argv[1] == '-startup'):
-        bStartup = True
-    if (sys.argv[1] == '-shortcut'):
-        bShortcut = True				
+        bStartup = True			
 except:
     pass
 
 Debug( '::Settings::', True)
 Debug( 'AutoStart: ' + str(bAutoStart), True)
 Debug( 'RunBackground: ' + str(bRunBackground), True)
-# Debug( 'Username: ' + username, True)
-# Debug( 'Password: ' + password, True)
+Debug( 'Username: ' + bUsername, True)
+Debug( 'Password: ' + bPassword, True)
 Debug( 'FirstRun: ' + str(bFirstRun), True)
 Debug( 'AutoSubmitVideo:' + str(bAutoSubmitVideo), True)
 Debug( 'VideoThreshold: ' + str(VideoThreshold), True)
 Debug( 'Startup: ' + str(bStartup), True)
-Debug( 'Shortcut: ' + str(bShortcut), True)
 Debug( '::Settings::', True)
 
 ###Initial checks
-#API Validation
-# api, auth = Twitter_Login()
-# if not api:
-#     ShowMessage(40007) #OAuth starts
-#     bRun = False
 
 #New Version
 # if ((CheckVersion() != __version__ ) and (bShowWhatsNew)):
@@ -215,14 +212,11 @@ if (not xbmc.getCondVisibility('videoplayer.isfullscreen') and not bShortcut and
     Debug(  'Pressed in scripts menu', False)        
     SetAutoStart(bAutoStart)
 
-if (not bRunBackground): bRun = False
-if (bShortcut): bRun = False
-
 #Startup Execution 
 if ((bStartup and bAutoStart) or bRun):
     Debug(  'Entering idle state, waiting for media playing...', False)
 
-    xbmc.executebuiltin('Notification(Trakt,' + __language__(45044).encode( "utf-8", "ignore" ) + ',3000)')
+    xbmc.executebuiltin('Notification(Trakt,' + __language__(45050).encode( "utf-8", "ignore" ) + ',3000)')
 
     while 1:
         #If Set To AutoSubmit
@@ -230,17 +224,5 @@ if ((bStartup and bAutoStart) or bRun):
             CheckAndSubmit()
 
         time.sleep(5)
-
-        
-#Manual Execution - Skin or Shortcut
-else:
-    bManual = True
-    Debug('Entering Manual Mode', False)
-    #manual tweet
-
-    if not xbmc.getCondVisibility('Player.Paused'): xbmc.Player().pause()
-    CheckIfPlayingAndTweet_Video(True)
-    CheckIfPlayingAndTweet_Music(True)
-    if xbmc.getCondVisibility('Player.Paused'): xbmc.Player().pause()
 
 Debug( 'Exiting...', False)

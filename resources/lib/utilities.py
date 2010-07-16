@@ -23,17 +23,26 @@ __settings__ = xbmc.Settings( path=os.getcwd() )
 
 def SendUpdate(info, sType):
     Debug("Creating data to send", False)
+    
+    bUsername = __settings__.getSetting( "Username" )
+    bPassword = __settings__.getSetting( "Password" )
+    
+    if (bUsername == '' or bPassword == ''):
+        Debug("Username or password not set", False)
+        xbmc.executebuiltin('Notification(Trakt,' + __language__(45051).encode( "utf-8", "ignore" ) + ',3000)')
+        return false
+    
     # split on type and create data packet for each type
     if (sType == "Movie"):
         Debug("Parsing Movie", False)
         # format: title, year
         title, year = info.split(",")
-        toSend = urllib.urlencode({"type": sType, "title": title, "year": year})
+        toSend = urllib.urlencode({"type": sType, "title": title, "year": year, "user": bUsername, "pass":bPassword})
     elif (sType == "TVShow"):
         Debug("Parsing TVShow", False)
         # format: title, year, season, episode
         title, year, season, episode = info.split(",")
-        toSend = urllib.urlencode({"type": sType, "title": title, "year": year, "season": season, "episode": episode})
+        toSend = urllib.urlencode({"type": sType, "title": title, "year": year, "season": season, "episode": episode, "user": bUsername, "pass":bPassword})
         
     Debug("Data: "+toSend, False)
     
@@ -41,10 +50,16 @@ def SendUpdate(info, sType):
     transmit(toSend)
     
 def transmit(status):
-    
-    def basic_authorization(user, password):
-        s = user + ":" + password
-        return "Basic " + s.encode("base64").rstrip()
+    # may use this later if other auth methods suck
+    # def basic_authorization(user, password):
+    #         bUsername = __settings__.getSetting( "Username" )
+    #         bPassword = __settings__.getSetting( "Password" )
+    #         if(bUsername == '' || bPassword == '')
+    #             xbmc.executebuiltin('Notification(Trakt,' + __language__(45051).encode( "utf-8", "ignore" ) + ',3000)')
+    #             return false
+    #         
+    #         s = user + ":" + password
+    #         return "Basic " + s.encode("base64").rstrip()
 
     req = urllib2.Request("http://www.theshallo.ws/trakt/index.php",
             status,
