@@ -10,7 +10,6 @@
 	<setting id="VideoThreshold" type="enum"  visible= "eq(-1,true)" enable="eq(-1,true)" label="45015" values="1%|5%|15%|50%|75%|95%" default="3" />
 
   <setting type="lsep" label="45002" />
-	<setting id="OnlyLibrary" type="bool" label="45007" default="true" />
 	<setting id="ExcludeAdult" type="bool" label="45008" default="true" />
 	<setting id="ExcludePathOption" type="bool" label="45009" default="false" />
   <setting id="ExcludePath" type="folder" source="files" label="45010" default="" visible= "eq(-1,true)" enable="eq(-1,true)" />

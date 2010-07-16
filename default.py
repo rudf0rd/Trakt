@@ -1,6 +1,7 @@
 import sys
 import os
 import xbmc
+import xbmcaddon
 import xbmcgui
 import string
 import webbrowser
@@ -14,7 +15,7 @@ __author__ = "Sean Rudford"
 __url__ = "http://code.google.com/p/trakt/"
 __svn_url__ = ""
 __credits__ = ""
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 __XBMC_Revision__ = ""
 
 def addPadding(number):
@@ -36,26 +37,26 @@ def CheckAndSubmit(Manual=False):
         global VideoThreshold
         global lasttitle
         
-        if ((xbmc.getInfoLabel("VideoPlayer.Year") == "") and __settings__.getSetting( "OnlyLibrary" ) == 'true'):
-            Debug('Movie is not in library', False)
+        if (xbmc.getInfoLabel("VideoPlayer.Year") == ""):
+            Debug('Video is not in library', False)
             bLibraryExcluded = True
         if ((xbmc.getInfoLabel("VideoPlayer.mpaa") == "XXX") and __settings__.getSetting( "ExcludeAdult" ) == 'true'):
-            Debug('Movie is with XXX mpaa rating', False)
+            Debug('Video is with XXX mpaa rating', False)
             bRatingExcluded = True
         if ((__settings__.getSetting( "ExcludePath" ) != "") and (__settings__.getSetting( "ExcludePathOption" ) == 'true')):
             currentPath = xbmc.Player().getPlayingFile()
             if (currentPath.find(__settings__.getSetting( "ExcludePath" )) > -1):
-                Debug('Movie is located in excluded path', False)
+                Debug('Video is located in excluded path', False)
                 bPathExcluded = True
         if ((__settings__.getSetting( "ExcludePath2" ) != "") and (__settings__.getSetting( "ExcludePathOption2" ) == 'true')):
             currentPath = xbmc.Player().getPlayingFile()
             if (currentPath.find(__settings__.getSetting( "ExcludePath2" )) > -1):
-                Debug('Movie is located in excluded path 2', False)
+                Debug('Video is located in excluded path 2', False)
                 bPathExcluded = True
         if ((__settings__.getSetting( "ExcludePath3" ) != "") and (__settings__.getSetting( "ExcludePathOption3" ) == 'true')):
             currentPath = xbmc.Player().getPlayingFile()
             if (currentPath.find(__settings__.getSetting( "ExcludePath3" )) > -1):
-                Debug('Movie is located in excluded path 3', False)
+                Debug('Video is located in excluded path 3', False)
                 bPathExcluded = True                     
         
         if len(xbmc.getInfoLabel("VideoPlayer.TVshowtitle")) >= 1: # TvShow
@@ -76,8 +77,7 @@ def CheckAndSubmit(Manual=False):
             sType = "Movie"
             Debug("Found Movie", False)
             # format: title, year
-            title = title.replace('%MOVIETITLE%', unicode(xbmc.getInfoLabel("VideoPlayer.Title"), 'utf-8'))
-            title = title.replace('%MOVIEYEAR%', unicode(xbmc.getInfoLabel("VideoPlayer.Year"), 'utf-8'))
+            title = unicode(xbmc.getInfoLabel("VideoPlayer.Title"), 'utf-8') + ',' + unicode(xbmc.getInfoLabel("VideoPlayer.Year"), 'utf-8')
 
             if (xbmc.getInfoLabel("VideoPlayer.Year") != ""):
                 try:
@@ -134,9 +134,12 @@ from utilities import *
 Debug('----------- ' + __scriptname__ + ' by ' + __author__ + ', version ' + __version__ + ' -----------', False)
 
 ###Settings related parsing
-__language__ = xbmc.Language( os.getcwd() ).getLocalizedString
+__settings__ = xbmcaddon.Addon(id='script.trakt')
+__language__ = __settings__.getLocalizedString
+
+# __language__ = xbmc.Language( os.getcwd() ).getLocalizedString
 _ = sys.modules[ "__main__" ].__language__
-__settings__ = xbmc.Settings( path=os.getcwd() )
+# __settings__ = xbmc.Settings( path=os.getcwd() )
 
 ###Vars and initial load
 bRun = True #Enter idle state waiting to submit

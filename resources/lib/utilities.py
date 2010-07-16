@@ -1,6 +1,7 @@
 import sys
 import os
 import xbmc
+import xbmcaddon
 import string
 import simplejson as json
 import urllib
@@ -18,8 +19,8 @@ VERSION_PATH = xbmc.translatePath( os.path.join( os.getcwd(), 'resources', 'vers
 #Consts
 AUTOEXEC_SCRIPT = '\nimport time;time.sleep(5);xbmc.executebuiltin("XBMC.RunScript(special://home/scripts/trakt/default.py,-startup)")\n'
 
-__language__ = xbmc.Language( os.getcwd() ).getLocalizedString
-__settings__ = xbmc.Settings( path=os.getcwd() )
+__settings__ = xbmcaddon.Addon(id='script.trakt')
+__language__ = __settings__.getLocalizedString
 
 def SendUpdate(info, sType):
     Debug("Creating data to send", False)
@@ -30,19 +31,29 @@ def SendUpdate(info, sType):
     if (bUsername == '' or bPassword == ''):
         Debug("Username or password not set", False)
         xbmc.executebuiltin('Notification(Trakt,' + __language__(45051).encode( "utf-8", "ignore" ) + ',3000)')
-        return false
+        return False
     
     # split on type and create data packet for each type
     if (sType == "Movie"):
         Debug("Parsing Movie", False)
         # format: title, year
         title, year = info.split(",")
-        toSend = urllib.urlencode({"type": sType, "title": title, "year": year, "user": bUsername, "pass":bPassword})
+        toSend = urllib.urlencode({ "type": sType, 
+                                    "title": title, 
+                                    "year": year, 
+                                    "username": bUsername, 
+                                    "password":bPassword})
     elif (sType == "TVShow"):
         Debug("Parsing TVShow", False)
         # format: title, year, season, episode
         title, year, season, episode = info.split(",")
-        toSend = urllib.urlencode({"type": sType, "title": title, "year": year, "season": season, "episode": episode, "user": bUsername, "pass":bPassword})
+        toSend = urllib.urlencode({"type": sType, 
+                                    "title": title, 
+                                    "year": year, 
+                                    "season": season, 
+                                    "episode": episode, 
+                                    "username": bUsername, 
+                                    "password":bPassword})
         
     Debug("Data: "+toSend, False)
     
@@ -61,7 +72,7 @@ def transmit(status):
     #         s = user + ":" + password
     #         return "Basic " + s.encode("base64").rstrip()
 
-    req = urllib2.Request("http://www.theshallo.ws/trakt/index.php",
+    req = urllib2.Request("http://api.dev.trakt.tv",
             status,
             headers = { "Accept": "*/*",   
                         "User-Agent": "Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)", 
