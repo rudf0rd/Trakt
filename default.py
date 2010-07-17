@@ -103,9 +103,8 @@ def CheckAndSubmit(Manual=False):
             iPercComp = CalcPercentageRemaining(xbmc.getInfoLabel("VideoPlayer.Time"), xbmc.getInfoLabel("VideoPlayer.Duration"))
             if (iPercComp > (float(VideoThreshold) / 100)):
                 Debug('Title: ' + title + ' current percentage: ' + str(iPercComp), True)
-                lasttitle = title
-                # json the title and send to web service
                 SendUpdate(title, sType)
+                lasttitle = title                
                            
 
 def CheckIfPlayingAndTweet_Music(Manual=False):

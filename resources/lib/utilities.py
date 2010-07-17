@@ -27,6 +27,7 @@ def SendUpdate(info, sType):
     
     bUsername = __settings__.getSetting( "Username" )
     bPassword = __settings__.getSetting( "Password" )
+    bNotify = __settings__.getSetting( "NotifyOnSubmit" )
     
     if (bUsername == '' or bPassword == ''):
         Debug("Username or password not set", False)
@@ -36,8 +37,15 @@ def SendUpdate(info, sType):
     # split on type and create data packet for each type
     if (sType == "Movie"):
         Debug("Parsing Movie", False)
+        
         # format: title, year
         title, year = info.split(",")
+        
+        # set alert text
+        submitAlert = __language__(45052).encode( "utf-8", "ignore" )
+        submitAlert = submitAlert.replace('%MOVIENAME%', title)
+        submitAlert = submitAlert.replace('%YEAR%', year)
+        
         toSend = urllib.urlencode({ "type": sType, 
                                     "title": title, 
                                     "year": year, 
@@ -45,8 +53,16 @@ def SendUpdate(info, sType):
                                     "password":bPassword})
     elif (sType == "TVShow"):
         Debug("Parsing TVShow", False)
+        
         # format: title, year, season, episode
         title, year, season, episode = info.split(",")
+        
+        # set alert text
+        submitAlert = __language__(45053).encode( "utf-8", "ignore" )
+        submitAlert = submitAlert.replace('%TVSHOW%', title)
+        submitAlert = submitAlert.replace('%SEASON%', season)
+        submitAlert = submitAlert.replace('%EPISODE%', episode)
+        
         toSend = urllib.urlencode({"type": sType, 
                                     "title": title, 
                                     "year": year, 
@@ -59,6 +75,9 @@ def SendUpdate(info, sType):
     
     # send
     transmit(toSend)
+    # and notify if wanted
+    if (bNotify == "true"):            
+        xbmc.executebuiltin('Notification(Trakt,' + submitAlert + ',3000)')
     
 def transmit(status):
     # may use this later if other auth methods suck
