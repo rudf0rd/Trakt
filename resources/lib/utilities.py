@@ -8,7 +8,7 @@ import urllib
 import urllib2
 
 __svn_url__ = "http://xbmc-addons.googlecode.com/svn/trunk/scripts/trakt/"
-__version__ = "0.0.1"
+__version__ = "0.0.2"
 
 #Path handling
 LANGUAGE_RESOURCE_PATH = xbmc.translatePath( os.path.join( os.getcwd(), 'resources', 'language' ) )
@@ -101,6 +101,7 @@ def transmit(status):
     # TODO : add error handling
 
 def Debug(message, Verbose=True):
+    message = "TRAKT: " + message
     bVerbose = __settings__.getSetting( "debug" )
     if (bVerbose == 'true'):
         bVerbose = True
