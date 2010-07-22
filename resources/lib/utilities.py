@@ -17,7 +17,7 @@ AUTOEXEC_PATH = xbmc.translatePath( 'special://home/scripts/autoexec.py' )
 VERSION_PATH = xbmc.translatePath( os.path.join( os.getcwd(), 'resources', 'version.cfg' ) )
 
 #Consts
-AUTOEXEC_SCRIPT = '\nimport time;time.sleep(5);xbmc.executebuiltin("XBMC.RunScript(special://home/scripts/trakt/default.py,-startup)")\n'
+AUTOEXEC_SCRIPT = '\nimport time;time.sleep(5);xbmc.executebuiltin("XBMC.RunScript(special://home/addons/script.trakt/default.py,-startup)")\n'
 
 __settings__ = xbmcaddon.Addon(id='script.trakt')
 __language__ = __settings__.getLocalizedString
