@@ -37,12 +37,22 @@ def SendUpdate(info, sType):
         Debug("Parsing Movie", False)
         # format: title, year
         title, year = info.split(",")
-        toSend = urllib.urlencode({"type": sType, "title": title, "year": year, "user": bUsername, "pass":bPassword})
+        toSend = urllib.urlencode({ "type": sType, 
+                                    "title": title, 
+                                    "year": year, 
+                                    "username": bUsername, 
+                                    "password":bPassword})
     elif (sType == "TVShow"):
         Debug("Parsing TVShow", False)
         # format: title, year, season, episode
         title, year, season, episode = info.split(",")
-        toSend = urllib.urlencode({"type": sType, "title": title, "year": year, "season": season, "episode": episode, "user": bUsername, "pass":bPassword})
+        toSend = urllib.urlencode({"type": sType, 
+                                    "title": title, 
+                                    "year": year, 
+                                    "season": season, 
+                                    "episode": episode, 
+                                    "username": bUsername, 
+                                    "password":bPassword})
         
     Debug("Data: "+toSend, False)
     
@@ -61,7 +71,7 @@ def transmit(status):
     #         s = user + ":" + password
     #         return "Basic " + s.encode("base64").rstrip()
 
-    req = urllib2.Request("http://www.theshallo.ws/trakt/index.php",
+    req = urllib2.Request("http://api.dev.trakt.tv",
             status,
             headers = { "Accept": "*/*",   
                         "User-Agent": "Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)", 
