@@ -14,6 +14,7 @@ __version__ = "0.0.2"
 LANGUAGE_RESOURCE_PATH = xbmc.translatePath( os.path.join( os.getcwd(), 'resources', 'language' ) )
 CONFIG_PATH = xbmc.translatePath( os.path.join( os.getcwd(), 'resources', 'settings.cfg' ) )
 AUTOEXEC_PATH = xbmc.translatePath( 'special://home/scripts/autoexec.py' )
+AUTOEXEC_FOLDER_PATH = xbmc.translatePath( 'special://home/scripts/' )
 VERSION_PATH = xbmc.translatePath( os.path.join( os.getcwd(), 'resources', 'version.cfg' ) )
 
 #Consts
@@ -184,10 +185,17 @@ def SetAutoStart(bState = True):
                     autoexecfile.write(line)
             autoexecfile.close()            
     else:
-        Debug( 'File Autoexec.py is missing, creating file with autostart script', True)
-        autoexecfile = file(AUTOEXEC_PATH, 'w')
-        autoexecfile.write (AUTOEXEC_SCRIPT.strip())
-        autoexecfile.close()
+        if (os.path.exists(AUTOEXEC_FOLDER_PATH)):
+            Debug( 'File Autoexec.py is missing, creating file with autostart script', True)
+            autoexecfile = file(AUTOEXEC_PATH, 'w')
+            autoexecfile.write (AUTOEXEC_SCRIPT.strip())
+            autoexecfile.close()
+        else:
+            Debug( 'Scripts folder is missing, creating folder and autoexec.py file with autostart script', True)
+            os.makedirs(AUTOEXEC_FOLDER_PATH)
+            autoexecfile = file(AUTOEXEC_PATH, 'w')
+            autoexecfile.write (AUTOEXEC_SCRIPT.strip())
+            autoexecfile.close()
     Debug( '::AutoStart::'  , True)
 
 #Check for new version
