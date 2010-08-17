@@ -15,7 +15,7 @@ __author__ = "Sean Rudford"
 __url__ = "http://code.google.com/p/trakt/"
 __svn_url__ = ""
 __credits__ = ""
-__version__ = "0.0.2"
+__version__ = "0.0.3"
 __XBMC_Revision__ = ""
 
 def addPadding(number):
@@ -36,6 +36,7 @@ def CheckAndSubmit(Manual=False):
         imdburl = ""
         global VideoThreshold
         global lasttitle
+        global lastUpdate
         
         if (xbmc.getInfoLabel("VideoPlayer.Year") == ""):
             Debug('Video is not in library', False)
@@ -102,13 +103,17 @@ def CheckAndSubmit(Manual=False):
         if ((title != "" and lasttitle != title)  and not bExcluded):
             iPercComp = CalcPercentageRemaining(xbmc.getInfoLabel("VideoPlayer.Time"), xbmc.getInfoLabel("VideoPlayer.Duration"))
             if (iPercComp > (float(VideoThreshold) / 100)):
-                Debug('Title: ' + title + ' current percentage: ' + str(iPercComp), True)
-                SendUpdate(title, sType)
-                lasttitle = title                
-                           
-
-def CheckIfPlayingAndTweet_Music(Manual=False):
-    return False
+                Debug('Title: ' + title + ', sending watched status, current percentage: ' + str(iPercComp), True)
+                SendUpdate(title, sType, "watched")
+                lasttitle = title
+            elif (time.time() - lastUpdate >= 900):
+                Debug('Title: ' + title + ', sending watching status, current percentage: ' + str(iPercComp), True)
+                SendUpdate(title, sType, "watching")
+                lastUpdate = time.time();
+    
+    else:
+        Debug('Resetting last update timestamp')
+        lastUpdate = 0
 
 def ShowMessage(MessageID):
     # import gui_auth
@@ -147,6 +152,7 @@ bShortcut = False
 bUsername = False
 bPassword = False
 lasttitle = ""
+lastUpdate = 0
 
 bAutoStart = False
 bRunBackground = False
@@ -225,6 +231,6 @@ if ((bStartup and bAutoStart) or bRun):
         if (bAutoSubmitVideo):
             CheckAndSubmit()
 
-        time.sleep(5)
+        time.sleep(15)
 
 Debug( 'Exiting...', False)
