@@ -8,7 +8,7 @@ import urllib
 import urllib2
 
 __svn_url__ = "http://xbmc-addons.googlecode.com/svn/trunk/scripts/trakt/"
-__version__ = "0.0.3"
+__version__ = "0.0.2"
 
 #Path handling
 LANGUAGE_RESOURCE_PATH = xbmc.translatePath( os.path.join( os.getcwd(), 'resources', 'language' ) )
@@ -23,7 +23,7 @@ AUTOEXEC_SCRIPT = '\nimport time;time.sleep(5);xbmc.executebuiltin("XBMC.RunScri
 __settings__ = xbmcaddon.Addon(id='script.trakt')
 __language__ = __settings__.getLocalizedString
 
-def SendUpdate(info, sType, status):
+def SendUpdate(info, sType):
     Debug("Creating data to send", False)
     
     bUsername = __settings__.getSetting( "Username" )
@@ -32,7 +32,7 @@ def SendUpdate(info, sType, status):
     
     if (bUsername == '' or bPassword == ''):
         Debug("Username or password not set", False)
-        xbmc.executebuiltin('Notification(Trakt,' + __language__(45051).encode( "utf-8", "ignore" ) + ',5000)')
+        xbmc.executebuiltin('Notification(Trakt,' + __language__(45051).encode( "utf-8", "ignore" ) + ',3000)')
         return False
     
     # split on type and create data packet for each type
@@ -47,12 +47,11 @@ def SendUpdate(info, sType, status):
         submitAlert = submitAlert.replace('%MOVIENAME%', title)
         submitAlert = submitAlert.replace('%YEAR%', year)
         
-        toSend = urllib.urlencode({ "type": sType,
-                                    "status": status,
+        toSend = urllib.urlencode({ "type": sType, 
                                     "title": title, 
                                     "year": year, 
                                     "username": bUsername, 
-                                    "password": bPassword})
+                                    "password":bPassword})
     elif (sType == "TVShow"):
         Debug("Parsing TVShow", False)
         
@@ -65,21 +64,20 @@ def SendUpdate(info, sType, status):
         submitAlert = submitAlert.replace('%SEASON%', season)
         submitAlert = submitAlert.replace('%EPISODE%', episode)
         
-        toSend = urllib.urlencode({ "type": sType,
-                                    "status": status,
+        toSend = urllib.urlencode({"type": sType, 
                                     "title": title, 
                                     "year": year, 
                                     "season": season, 
                                     "episode": episode, 
                                     "username": bUsername, 
-                                    "password": bPassword})
+                                    "password":bPassword})
         
     Debug("Data: "+toSend, False)
     
     # send
     transmit(toSend)
     # and notify if wanted
-    if (bNotify == "true" and status == "watched"):            
+    if (bNotify == "true"):            
         xbmc.executebuiltin('Notification(Trakt,' + submitAlert + ',3000)')
     
 def transmit(status):

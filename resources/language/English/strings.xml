@@ -19,6 +19,6 @@
 	
 	<string id="45050">Waiting to submit your media</string>
 	<string id="45051">You need to enter a username and password!</string>
-	<string id="45052">Submitted %MOVIENAME% (%YEAR%)</string>
+	<string id="45052">Submitted %MOVIENAME% (%YEAR)</string>
 	<string id="45053">Submitted %TVSHOW% %SEASON%x%EPISODE%</string>
 </strings>
