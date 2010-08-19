@@ -38,6 +38,12 @@ def CheckAndSubmit(Manual=False):
         global lasttitle
         global lastUpdate
         
+        pauseCheck = xbmc.Player().getTime()
+        time.sleep(1)
+        if(xbmc.Player().getTime() == pauseCheck):
+            Debug('Video is currently paused', False)
+            return
+        
         if (xbmc.getInfoLabel("VideoPlayer.Year") == ""):
             Debug('Video is not in library', False)
             bLibraryExcluded = True
