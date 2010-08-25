@@ -40,8 +40,12 @@ def CheckAndSubmit(Manual=False):
         
         pauseCheck = xbmc.Player().getTime()
         time.sleep(1)
-        if(xbmc.Player().getTime() == pauseCheck):
-            Debug('Video is currently paused', False)
+        if xbmc.Player().isPlayingVideo():
+            if (xbmc.Player().getTime() == pauseCheck):
+                Debug('Video is currently paused', False)
+                return
+        else:
+            Debug('Video ended during pause check', False)
             return
         
         if (xbmc.getInfoLabel("VideoPlayer.Year") == ""):
