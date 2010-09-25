@@ -7,14 +7,11 @@ import simplejson as json
 import urllib
 import urllib2
 
-__svn_url__ = "http://xbmc-addons.googlecode.com/svn/trunk/scripts/trakt/"
-__version__ = "0.0.2"
-
 #Path handling
 LANGUAGE_RESOURCE_PATH = xbmc.translatePath( os.path.join( os.getcwd(), 'resources', 'language' ) )
 CONFIG_PATH = xbmc.translatePath( os.path.join( os.getcwd(), 'resources', 'settings.cfg' ) )
-AUTOEXEC_PATH = xbmc.translatePath( 'special://home/scripts/autoexec.py' )
-AUTOEXEC_FOLDER_PATH = xbmc.translatePath( 'special://home/scripts/' )
+AUTOEXEC_PATH = xbmc.translatePath( 'special://home/userdata/autoexec.py' )
+AUTOEXEC_FOLDER_PATH = xbmc.translatePath( 'special://home/userdata/' )
 VERSION_PATH = xbmc.translatePath( os.path.join( os.getcwd(), 'resources', 'version.cfg' ) )
 
 #Consts
@@ -22,6 +19,7 @@ AUTOEXEC_SCRIPT = '\nimport time;time.sleep(5);xbmc.executebuiltin("XBMC.RunScri
 
 __settings__ = xbmcaddon.Addon(id='script.trakt')
 __language__ = __settings__.getLocalizedString
+__version__ = "0.0.4"
 
 def SendUpdate(info, sType, status):
     Debug("Creating data to send", False)
@@ -70,7 +68,11 @@ def SendUpdate(info, sType, status):
                                     "title": title, 
                                     "year": year, 
                                     "season": season, 
-                                    "episode": episode, 
+                                    "episode": episode,
+                                    "plugin_version": __version__,
+                                    "media_center": 'xbmc',
+                                    "media_center_version": xbmc.getInfoLabel( "system.buildversion" ),
+                                    "media_center_date": xbmc.getInfoLabel( "system.builddate" ),
                                     "username": bUsername, 
                                     "password": bPassword})
         

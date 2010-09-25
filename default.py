@@ -12,10 +12,10 @@ import string
 ###General vars
 __scriptname__ = "trakt"
 __author__ = "Sean Rudford"
-__url__ = "http://code.google.com/p/trakt/"
-__svn_url__ = ""
-__credits__ = ""
-__version__ = "0.0.3"
+__url__ = "http://dev.trakt.tv/"
+# __svn_url__ = ""
+# __credits__ = ""
+__version__ = "0.0.4"
 __XBMC_Revision__ = ""
 
 def addPadding(number):
@@ -51,7 +51,7 @@ def CheckAndSubmit(Manual=False):
         if (xbmc.getInfoLabel("VideoPlayer.Year") == ""):
             Debug('Video is not in library', False)
             bLibraryExcluded = True
-        if ((xbmc.getInfoLabel("VideoPlayer.mpaa") == "XXX") and __settings__.getSetting( "ExcludeAdult" ) == 'true'):
+        if ((xbmc.getInfoLabel("VideoPlayer.mpaa") == "XXX")):
             Debug('Video is with XXX mpaa rating', False)
             bRatingExcluded = True
         if ((__settings__.getSetting( "ExcludePath" ) != "") and (__settings__.getSetting( "ExcludePathOption" ) == 'true')):
@@ -177,12 +177,8 @@ bUsername = __settings__.getSetting( "Username" )
 bPassword = __settings__.getSetting( "Password" )
 
 VideoThreshold = int(__settings__.getSetting( "VideoThreshold" ))
-if (VideoThreshold == 0): VideoThreshold = 1
-elif (VideoThreshold == 1): VideoThreshold = 5
-elif (VideoThreshold == 2): VideoThreshold = 15
-elif (VideoThreshold == 3): VideoThreshold = 50
-elif (VideoThreshold == 4): VideoThreshold = 75
-elif (VideoThreshold == 5): VideoThreshold = 95
+if (VideoThreshold == 0): VideoThreshold = 75
+elif (VideoThreshold == 1): VideoThreshold = 95
 
 bFirstRun = CheckIfFirstRun()
 
