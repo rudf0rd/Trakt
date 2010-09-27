@@ -12,7 +12,7 @@ import string
 ###General vars
 __scriptname__ = "trakt"
 __author__ = "Sean Rudford"
-__url__ = "http://dev.trakt.tv/"
+__url__ = "http://trakt.tv/"
 # __svn_url__ = ""
 # __credits__ = ""
 __version__ = "0.0.4"
@@ -124,15 +124,6 @@ def CheckAndSubmit(Manual=False):
     else:
         Debug('Resetting last update timestamp')
         lastUpdate = 0
-
-def ShowMessage(MessageID):
-    # import gui_auth
-    # message = __language__(MessageID)
-    # ui = gui_auth.GUI( "script-xbTweet-Generic.xml" , os.getcwd(), "Default")
-    # ui.setParams ("message", __language__(30042), message, 0)
-    # ui.doModal()
-    # del ui
-		return False
     
 ###Path handling
 BASE_PATH = xbmc.translatePath( os.getcwd() )
