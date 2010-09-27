@@ -6,9 +6,6 @@ import simplejson as json
 import urllib
 import urllib2
 
-__svn_url__ = "http://xbmc-addons.googlecode.com/svn/trunk/scripts/trakt/"
-__version__ = "0.0.1"
-
 #Path handling
 LANGUAGE_RESOURCE_PATH = xbmc.translatePath( os.path.join( os.getcwd(), 'resources', 'language' ) )
 CONFIG_PATH = xbmc.translatePath( os.path.join( os.getcwd(), 'resources', 'settings.cfg' ) )
@@ -20,44 +17,70 @@ AUTOEXEC_SCRIPT = '\nimport time;time.sleep(5);xbmc.executebuiltin("XBMC.RunScri
 
 __language__ = xbmc.Language( os.getcwd() ).getLocalizedString
 __settings__ = xbmc.Settings( path=os.getcwd() )
+__version__ = "0.0.4"
 
-def SendUpdate(info, sType):
+def SendUpdate(info, sType, status):
     Debug("Creating data to send", False)
     
     bUsername = __settings__.getSetting( "Username" )
     bPassword = __settings__.getSetting( "Password" )
+    bNotify = __settings__.getSetting( "NotifyOnSubmit" )
     
     if (bUsername == '' or bPassword == ''):
         Debug("Username or password not set", False)
-        xbmc.executebuiltin('Notification(Trakt,' + __language__(45051).encode( "utf-8", "ignore" ) + ',3000)')
-        return false
+        xbmc.executebuiltin('Notification(Trakt,' + __language__(45051).encode( "utf-8", "ignore" ) + ',5000)')
+        return False
     
     # split on type and create data packet for each type
     if (sType == "Movie"):
         Debug("Parsing Movie", False)
+        
         # format: title, year
         title, year = info.split(",")
-        toSend = urllib.urlencode({ "type": sType, 
+        
+        # set alert text
+        submitAlert = __language__(45052).encode( "utf-8", "ignore" )
+        submitAlert = submitAlert.replace('%MOVIENAME%', title)
+        submitAlert = submitAlert.replace('%YEAR%', year)
+        
+        toSend = urllib.urlencode({ "type": sType,
+                                    "status": status,
                                     "title": title, 
                                     "year": year, 
                                     "username": bUsername, 
-                                    "password":bPassword})
+                                    "password": bPassword})
     elif (sType == "TVShow"):
         Debug("Parsing TVShow", False)
+        
         # format: title, year, season, episode
         title, year, season, episode = info.split(",")
-        toSend = urllib.urlencode({"type": sType, 
+        
+        # set alert text
+        submitAlert = __language__(45053).encode( "utf-8", "ignore" )
+        submitAlert = submitAlert.replace('%TVSHOW%', title)
+        submitAlert = submitAlert.replace('%SEASON%', season)
+        submitAlert = submitAlert.replace('%EPISODE%', episode)
+        
+        toSend = urllib.urlencode({ "type": sType,
+                                    "status": status,
                                     "title": title, 
                                     "year": year, 
                                     "season": season, 
-                                    "episode": episode, 
+                                    "episode": episode,
+                                    "plugin_version": __version__,
+                                    "media_center": 'xbmc',
+                                    "media_center_version": xbmc.getInfoLabel( "system.buildversion" ),
+                                    "media_center_date": xbmc.getInfoLabel( "system.builddate" ),
                                     "username": bUsername, 
-                                    "password":bPassword})
+                                    "password": bPassword})
         
     Debug("Data: "+toSend, False)
     
     # send
     transmit(toSend)
+    # and notify if wanted
+    if (bNotify == "true" and status == "watched"):
+        xbmc.executebuiltin('Notification(Trakt,' + submitAlert + ',3000)')
     
 def transmit(status):
     # may use this later if other auth methods suck
@@ -81,6 +104,7 @@ def transmit(status):
     # TODO : add error handling
 
 def Debug(message, Verbose=True):
+    message = "TRAKT: " + message
     bVerbose = __settings__.getSetting( "debug" )
     if (bVerbose == 'true'):
         bVerbose = True
@@ -163,10 +187,17 @@ def SetAutoStart(bState = True):
                     autoexecfile.write(line)
             autoexecfile.close()            
     else:
-        Debug( 'File Autoexec.py is missing, creating file with autostart script', True)
-        autoexecfile = file(AUTOEXEC_PATH, 'w')
-        autoexecfile.write (AUTOEXEC_SCRIPT.strip())
-        autoexecfile.close()
+        if (os.path.exists(AUTOEXEC_FOLDER_PATH)):
+            Debug( 'File Autoexec.py is missing, creating file with autostart script', True)
+            autoexecfile = file(AUTOEXEC_PATH, 'w')
+            autoexecfile.write (AUTOEXEC_SCRIPT.strip())
+            autoexecfile.close()
+        else:
+            Debug( 'Scripts folder is missing, creating folder and autoexec.py file with autostart script', True)
+            os.makedirs(AUTOEXEC_FOLDER_PATH)
+            autoexecfile = file(AUTOEXEC_PATH, 'w')
+            autoexecfile.write (AUTOEXEC_SCRIPT.strip())
+            autoexecfile.close()
     Debug( '::AutoStart::'  , True)
 
 #Check for new version

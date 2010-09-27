@@ -7,7 +7,7 @@
 	<string id="45004">Auto-start Trakt on launch</string>
 	<string id="45005">Username</string>
 	<string id="45006">Password</string>
-	<string id="45007">Submit only if playing library item</string>
+	<string id="45007">Notify after the video is submitted</string>
 	<string id="45008">Exclude adult content (you perv)</string>
 	<string id="45009">Exclude path</string>
 	<string id="45010">Folder's path (and subfolders)</string>
@@ -19,4 +19,6 @@
 	
 	<string id="45050">Waiting to submit your media</string>
 	<string id="45051">You need to enter a username and password!</string>
+	<string id="45052">Submitted %MOVIENAME% (%YEAR%)</string>
+	<string id="45053">Submitted %TVSHOW% %SEASON%x%EPISODE%</string>
 </strings>

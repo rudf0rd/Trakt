@@ -11,10 +11,10 @@ import string
 ###General vars
 __scriptname__ = "trakt"
 __author__ = "Sean Rudford"
-__url__ = "http://code.google.com/p/trakt/"
-__svn_url__ = ""
-__credits__ = ""
-__version__ = "0.0.1"
+__url__ = "http://dev.trakt.tv/"
+# __svn_url__ = ""
+# __credits__ = ""
+__version__ = "0.0.4"
 __XBMC_Revision__ = ""
 
 def addPadding(number):
@@ -36,26 +36,38 @@ def CheckAndSubmit(Manual=False):
         global VideoThreshold
         global lasttitle
         
-        if ((xbmc.getInfoLabel("VideoPlayer.Year") == "") and __settings__.getSetting( "OnlyLibrary" ) == 'true'):
-            Debug('Movie is not in library', False)
+        global lastUpdate
+        
+        pauseCheck = xbmc.Player().getTime()
+        time.sleep(1)
+        if xbmc.Player().isPlayingVideo():
+            if (xbmc.Player().getTime() == pauseCheck):
+                Debug('Video is currently paused', False)
+                return
+        else:
+            Debug('Video ended during pause check', False)
+            return
+        
+        if (xbmc.getInfoLabel("VideoPlayer.Year") == ""):
+            Debug('Video is not in library', False)
             bLibraryExcluded = True
-        if ((xbmc.getInfoLabel("VideoPlayer.mpaa") == "XXX") and __settings__.getSetting( "ExcludeAdult" ) == 'true'):
-            Debug('Movie is with XXX mpaa rating', False)
+        if ((xbmc.getInfoLabel("VideoPlayer.mpaa") == "XXX")):
+            Debug('Video is with XXX mpaa rating', False)
             bRatingExcluded = True
         if ((__settings__.getSetting( "ExcludePath" ) != "") and (__settings__.getSetting( "ExcludePathOption" ) == 'true')):
             currentPath = xbmc.Player().getPlayingFile()
             if (currentPath.find(__settings__.getSetting( "ExcludePath" )) > -1):
-                Debug('Movie is located in excluded path', False)
+                Debug('Video is located in excluded path', False)
                 bPathExcluded = True
         if ((__settings__.getSetting( "ExcludePath2" ) != "") and (__settings__.getSetting( "ExcludePathOption2" ) == 'true')):
             currentPath = xbmc.Player().getPlayingFile()
             if (currentPath.find(__settings__.getSetting( "ExcludePath2" )) > -1):
-                Debug('Movie is located in excluded path 2', False)
+                Debug('Video is located in excluded path 2', False)
                 bPathExcluded = True
         if ((__settings__.getSetting( "ExcludePath3" ) != "") and (__settings__.getSetting( "ExcludePathOption3" ) == 'true')):
             currentPath = xbmc.Player().getPlayingFile()
             if (currentPath.find(__settings__.getSetting( "ExcludePath3" )) > -1):
-                Debug('Movie is located in excluded path 3', False)
+                Debug('Video is located in excluded path 3', False)
                 bPathExcluded = True                     
         
         if len(xbmc.getInfoLabel("VideoPlayer.TVshowtitle")) >= 1: # TvShow
@@ -76,8 +88,7 @@ def CheckAndSubmit(Manual=False):
             sType = "Movie"
             Debug("Found Movie", False)
             # format: title, year
-            title = title.replace('%MOVIETITLE%', unicode(xbmc.getInfoLabel("VideoPlayer.Title"), 'utf-8'))
-            title = title.replace('%MOVIEYEAR%', unicode(xbmc.getInfoLabel("VideoPlayer.Year"), 'utf-8'))
+            title = unicode(xbmc.getInfoLabel("VideoPlayer.Title"), 'utf-8') + ',' + unicode(xbmc.getInfoLabel("VideoPlayer.Year"), 'utf-8')
 
             if (xbmc.getInfoLabel("VideoPlayer.Year") != ""):
                 try:
@@ -102,23 +113,17 @@ def CheckAndSubmit(Manual=False):
         if ((title != "" and lasttitle != title)  and not bExcluded):
             iPercComp = CalcPercentageRemaining(xbmc.getInfoLabel("VideoPlayer.Time"), xbmc.getInfoLabel("VideoPlayer.Duration"))
             if (iPercComp > (float(VideoThreshold) / 100)):
-                Debug('Title: ' + title + ' current percentage: ' + str(iPercComp), True)
+                Debug('Title: ' + title + ', sending watched status, current percentage: ' + str(iPercComp), True)
+                SendUpdate(title, sType, "watched")
                 lasttitle = title
-                # json the title and send to web service
-                SendUpdate(title, sType)
-                           
-
-def CheckIfPlayingAndTweet_Music(Manual=False):
-    return False
-
-def ShowMessage(MessageID):
-    # import gui_auth
-    # message = __language__(MessageID)
-    # ui = gui_auth.GUI( "script-xbTweet-Generic.xml" , os.getcwd(), "Default")
-    # ui.setParams ("message", __language__(30042), message, 0)
-    # ui.doModal()
-    # del ui
-		return False
+            elif (time.time() - lastUpdate >= 900):
+                Debug('Title: ' + title + ', sending watching status, current percentage: ' + str(iPercComp), True)
+                SendUpdate(title, sType, "watching")
+                lastUpdate = time.time();
+    
+    else:
+        Debug('Resetting last update timestamp')
+        lastUpdate = 0
     
 ###Path handling
 BASE_PATH = xbmc.translatePath( os.getcwd() )
@@ -145,6 +150,7 @@ bShortcut = False
 bUsername = False
 bPassword = False
 lasttitle = ""
+lastUpdate = 0
 
 bAutoStart = False
 bRunBackground = False
@@ -159,12 +165,8 @@ bUsername = __settings__.getSetting( "Username" )
 bPassword = __settings__.getSetting( "Password" )
 
 VideoThreshold = int(__settings__.getSetting( "VideoThreshold" ))
-if (VideoThreshold == 0): VideoThreshold = 1
-elif (VideoThreshold == 1): VideoThreshold = 5
-elif (VideoThreshold == 2): VideoThreshold = 15
-elif (VideoThreshold == 3): VideoThreshold = 50
-elif (VideoThreshold == 4): VideoThreshold = 75
-elif (VideoThreshold == 5): VideoThreshold = 95
+if (VideoThreshold == 0): VideoThreshold = 75
+elif (VideoThreshold == 1): VideoThreshold = 95
 
 bFirstRun = CheckIfFirstRun()
 
@@ -223,6 +225,6 @@ if ((bStartup and bAutoStart) or bRun):
         if (bAutoSubmitVideo):
             CheckAndSubmit()
 
-        time.sleep(5)
+        time.sleep(15)
 
 Debug( 'Exiting...', False)
