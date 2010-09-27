@@ -120,7 +120,7 @@ def CheckAndSubmit(Manual=False):
                 Debug('Title: ' + title + ', sending watching status, current percentage: ' + str(iPercComp), True)
                 SendUpdate(title, sType, "watching")
                 lastUpdate = time.time();
-    
+
     else:
         Debug('Resetting last update timestamp')
         lastUpdate = 0

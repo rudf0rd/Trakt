@@ -10,6 +10,7 @@ import urllib2
 LANGUAGE_RESOURCE_PATH = xbmc.translatePath( os.path.join( os.getcwd(), 'resources', 'language' ) )
 CONFIG_PATH = xbmc.translatePath( os.path.join( os.getcwd(), 'resources', 'settings.cfg' ) )
 AUTOEXEC_PATH = xbmc.translatePath( 'special://home/scripts/autoexec.py' )
+AUTOEXEC_FOLDER_PATH = xbmc.translatePath( 'special://home/scripts/' )
 VERSION_PATH = xbmc.translatePath( os.path.join( os.getcwd(), 'resources', 'version.cfg' ) )
 
 #Consts

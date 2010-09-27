@@ -23,7 +23,7 @@
     <title>trakt</title>
 
     <!-- (required) Major.minor.build -->
-    <version>0.0.1</version>
+    <version>0.0.4</version>
 
     <!-- (required) author name & email.  at least one author name is required -->
     <authors>
@@ -35,11 +35,11 @@
     <summary>A plugin for XBMC to submit and track your tv viewing habits</summary>
 
     <!-- Longer descrption of addon.  Usage instructions should go here if required. -->
-    <description>A plugin for XBMC to submit and track your tv viewing habits. The site will analyze your tv choices and suggest other shows based on comparing other user's habits.</description>
+    <description>trakt helps you keep a record of what TV shows you are watching. Based on your favorites, trakt recommends additional shows that you'll enjoy!</description>
 
     <!-- user defined tags e.g. <tags><tag>Example</tag></tags> -->
     <tags>
-        <tag>http://code.google.com/p/trakt/</tag>
+        <tag>http://dev.trakt.tv/</tag>
         <tag>trakt</tag>
     </tags>
 
