@@ -11,7 +11,7 @@ import string
 ###General vars
 __scriptname__ = "trakt"
 __author__ = "Sean Rudford"
-__url__ = "http://dev.trakt.tv/"
+__url__ = "http://trakt.tv/"
 # __svn_url__ = ""
 # __credits__ = ""
 __version__ = "0.0.4"

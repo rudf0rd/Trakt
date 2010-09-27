@@ -95,7 +95,7 @@ def transmit(status):
     #         s = user + ":" + password
     #         return "Basic " + s.encode("base64").rstrip()
 
-    req = urllib2.Request("http://api.dev.trakt.tv",
+    req = urllib2.Request("http://api.trakt.tv",
             status,
             headers = { "Accept": "*/*",   
                         "User-Agent": "Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)", 
