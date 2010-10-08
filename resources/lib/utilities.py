@@ -3,7 +3,6 @@ import os
 import xbmc
 import xbmcaddon
 import string
-import simplejson as json
 import urllib
 import urllib2
 
