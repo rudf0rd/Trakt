@@ -10,7 +10,7 @@
              library="default.py" />
   <extension point="xbmc.addon.metadata">
     <summary lang="en">trakt</summary>
-    <description lang="en">trakt helps you keep a record of what TV shows you are watching. Based on your favorites, trakt recommends additional shows that you'll enjoy!</description>
+    <description lang="en">trakt helps you keep a record of what TV shows you are watching. Based on your favorites, trakt recommends additional shows that you'll enjoy! Get your account started on http://trakt.tv</description>
     <platform>all</platform>
   </extension>
 </addon>
