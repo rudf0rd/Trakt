@@ -48,7 +48,11 @@ def SendUpdate(info, sType, status):
         toSend = urllib.urlencode({ "type": sType,
                                     "status": status,
                                     "title": title, 
-                                    "year": year, 
+                                    "year": year,
+                                    "plugin_version": __version__,
+                                    "media_center": 'xbmc',
+                                    "media_center_version": xbmc.getInfoLabel( "system.buildversion" ),
+                                    "media_center_date": xbmc.getInfoLabel( "system.builddate" ),
                                     "username": bUsername, 
                                     "password": bPassword})
     elif (sType == "TVShow"):
