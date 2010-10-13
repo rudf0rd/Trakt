@@ -15,7 +15,7 @@
 	<string id="45012">Enable debug logging</string>
 	<string id="45013">Submission options</string>
 	<string id="45014">Turn on auto submit</string>
-	<string id="45015">Submit only after I watch this percentage of the video</string>
+	<string id="45015">Submit after XX percentage watched</string>
 	
 	<string id="45050">Waiting to submit your media</string>
 	<string id="45051">You need to enter a username and password!</string>

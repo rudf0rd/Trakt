@@ -13,9 +13,7 @@ import string
 __scriptname__ = "trakt"
 __author__ = "Sean Rudford"
 __url__ = "http://trakt.tv/"
-# __svn_url__ = ""
-# __credits__ = ""
-__version__ = "0.0.4"
+__version__ = "0.0.5"
 __XBMC_Revision__ = ""
 
 def addPadding(number):
@@ -110,20 +108,26 @@ def CheckAndSubmit(Manual=False):
         
         Debug("Title: " + title)
         
-        if ((title != "" and lasttitle != title)  and not bExcluded):
+        # set lasttitle and lastUpdate from save state files
+        state = ReadMediaState()
+        
+        if (state != False):
+            lasttitle, lastUpdate = state.split("::::")
+        
+        if(time.time() - float(lastUpdate) >= 86400):
+            lastUpdate = 0
+            
+        if ((title != "" and lasttitle != title) and not bExcluded):
             iPercComp = CalcPercentageRemaining(xbmc.getInfoLabel("VideoPlayer.Time"), xbmc.getInfoLabel("VideoPlayer.Duration"))
             if (iPercComp > (float(VideoThreshold) / 100)):
                 Debug('Title: ' + title + ', sending watched status, current percentage: ' + str(iPercComp), True)
                 SendUpdate(title, sType, "watched")
-                lasttitle = title
-            elif (time.time() - lastUpdate >= 900):
+            elif (time.time() - float(lastUpdate) >= 900):
                 Debug('Title: ' + title + ', sending watching status, current percentage: ' + str(iPercComp), True)
                 SendUpdate(title, sType, "watching")
-                lastUpdate = time.time();
-    
-    else:
-        Debug('Resetting last update timestamp')
-        lastUpdate = 0
+            elif (title != "" and lasttitle != title and lasttitle != "none"):
+                Debug('Title: ' + title + ', sending watching status, current percentage: ' + str(iPercComp), True)
+                SendUpdate(title, sType, "watching")
     
 ###Path handling
 BASE_PATH = xbmc.translatePath( os.getcwd() )
@@ -141,10 +145,7 @@ Debug('----------- ' + __scriptname__ + ' by ' + __author__ + ', version ' + __v
 ###Settings related parsing
 __settings__ = xbmcaddon.Addon(id='script.trakt')
 __language__ = __settings__.getLocalizedString
-
-# __language__ = xbmc.Language( os.getcwd() ).getLocalizedString
 _ = sys.modules[ "__main__" ].__language__
-# __settings__ = xbmc.Settings( path=os.getcwd() )
 
 ###Vars and initial load
 bRun = True #Enter idle state waiting to submit
@@ -152,6 +153,7 @@ bStartup = False
 bShortcut = False
 bUsername = False
 bPassword = False
+bNotify = False
 lasttitle = ""
 lastUpdate = 0
 
@@ -161,6 +163,7 @@ bAutoSubmitVideo = False
 VideoThreshold = 0
 
 if (__settings__.getSetting( "AutoStart" ) == 'true'): bAutoStart = True
+if (__settings__.getSetting( "NotifyOnSubmit" ) == 'true'): bNotify = True
 if (__settings__.getSetting( "RunBackground" ) == 'true'): bRunBackground = True
 if (__settings__.getSetting( "AutoSubmitVideo" ) == 'true'): bAutoSubmitVideo = True
 
@@ -170,8 +173,6 @@ bPassword = __settings__.getSetting( "Password" )
 VideoThreshold = int(__settings__.getSetting( "VideoThreshold" ))
 if (VideoThreshold == 0): VideoThreshold = 75
 elif (VideoThreshold == 1): VideoThreshold = 95
-
-bFirstRun = CheckIfFirstRun()
 
 try:
     count = len(sys.argv) - 1
@@ -185,32 +186,12 @@ Debug( 'AutoStart: ' + str(bAutoStart), True)
 Debug( 'RunBackground: ' + str(bRunBackground), True)
 Debug( 'Username: ' + bUsername, True)
 Debug( 'Password: ' + bPassword, True)
-Debug( 'FirstRun: ' + str(bFirstRun), True)
 Debug( 'AutoSubmitVideo:' + str(bAutoSubmitVideo), True)
 Debug( 'VideoThreshold: ' + str(VideoThreshold), True)
 Debug( 'Startup: ' + str(bStartup), True)
 Debug( '::Settings::', True)
 
 ###Initial checks
-
-#New Version
-# if ((CheckVersion() != __version__ ) and (bShowWhatsNew)):
-#     try:
-#         import urllib
-#         usock = urllib.urlopen("http://xbtweet.googlecode.com/svn/trunk/xbTweet/whatsnew" + __version__ + ".txt")
-#         message = usock.read()
-#         usock.close()
-# 
-#         import gui_welcome
-#         ui = gui_welcome.GUI( "script-xbTweet-Generic.xml" , os.getcwd(), "Default")
-#         ui.setParams ("message",  __language__(30043), message, 0)
-#         ui.doModal()
-#         del ui
-# 
-#         #bRun = True
-#         WriteVersion(__version__)
-#     except:
-#         Debug('Failed to validate if new version', False)
 
 ###Main logic
 if (not xbmc.getCondVisibility('videoplayer.isfullscreen') and not bShortcut and not bStartup):
@@ -219,15 +200,15 @@ if (not xbmc.getCondVisibility('videoplayer.isfullscreen') and not bShortcut and
 
 #Startup Execution 
 if ((bStartup and bAutoStart) or bRun):
-    Debug(  'Entering idle state, waiting for media playing...', False)
+    if(bNotify):
+        xbmc.executebuiltin('Notification(Trakt,' + __language__(45050).encode( "utf-8", "ignore" ) + ',3000)')
 
-    xbmc.executebuiltin('Notification(Trakt,' + __language__(45050).encode( "utf-8", "ignore" ) + ',3000)')
-
-    while 1:
-        #If Set To AutoSubmit
-        if (bAutoSubmitVideo):
-            CheckAndSubmit()
-
-        time.sleep(15)
+    
+    #If Set To AutoSubmit
+    if (bAutoSubmitVideo):
+        CheckAndSubmit()
+    
+    xbmc.executebuiltin('cancelalarm("trakt")')
+    xbmc.executebuiltin('alarmclock("trakt", xbmc.runscript(script.trakt), 1, True)') 
 
 Debug( 'Exiting...', False)

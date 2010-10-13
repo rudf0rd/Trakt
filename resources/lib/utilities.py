@@ -3,6 +3,7 @@ import os
 import xbmc
 import xbmcaddon
 import string
+import time
 import urllib
 import urllib2
 
@@ -12,20 +13,23 @@ CONFIG_PATH = xbmc.translatePath( os.path.join( os.getcwd(), 'resources', 'setti
 AUTOEXEC_PATH = xbmc.translatePath( 'special://home/userdata/autoexec.py' )
 AUTOEXEC_FOLDER_PATH = xbmc.translatePath( 'special://home/userdata/' )
 VERSION_PATH = xbmc.translatePath( os.path.join( os.getcwd(), 'resources', 'version.cfg' ) )
+TRAKT_SAVE_FOLDER_PATH = xbmc.translatePath( 'special://home/userdata/trakt' )
+TRAKT_SAVE_PATH = xbmc.translatePath( 'special://home/userdata/trakt/lastupdate.txt' )
 
 #Consts
 AUTOEXEC_SCRIPT = '\nimport time;time.sleep(5);xbmc.executebuiltin("XBMC.RunScript(special://home/addons/script.trakt/default.py,-startup)")\n'
 
 __settings__ = xbmcaddon.Addon(id='script.trakt')
 __language__ = __settings__.getLocalizedString
-__version__ = "0.0.4"
+__version__ = "0.0.5"
 
 def SendUpdate(info, sType, status):
     Debug("Creating data to send", False)
     
     bUsername = __settings__.getSetting( "Username" )
     bPassword = __settings__.getSetting( "Password" )
-    bNotify = __settings__.getSetting( "NotifyOnSubmit" )
+    bNotify = False
+    if (__settings__.getSetting( "NotifyOnSubmit" ) == 'true'): bNotify = True
     
     if (bUsername == '' or bPassword == ''):
         Debug("Username or password not set", False)
@@ -43,6 +47,9 @@ def SendUpdate(info, sType, status):
         submitAlert = __language__(45052).encode( "utf-8", "ignore" )
         submitAlert = submitAlert.replace('%MOVIENAME%', title)
         submitAlert = submitAlert.replace('%YEAR%', year)
+        
+        # create state to save
+        media = title+','+year
         
         toSend = urllib.urlencode({ "type": sType,
                                     "status": status,
@@ -66,6 +73,9 @@ def SendUpdate(info, sType, status):
         submitAlert = submitAlert.replace('%SEASON%', season)
         submitAlert = submitAlert.replace('%EPISODE%', episode)
         
+        # create state to save
+        media = title+','+year+','+season+','+episode
+        
         toSend = urllib.urlencode({ "type": sType,
                                     "status": status,
                                     "title": title, 
@@ -79,12 +89,14 @@ def SendUpdate(info, sType, status):
                                     "username": bUsername, 
                                     "password": bPassword})
         
+    SaveMediaState(media, time.time(), status)
+    
     Debug("Data: "+toSend, False)
     
     # send
     transmit(toSend)
     # and notify if wanted
-    if (bNotify == "true" and status == "watched"):
+    if (bNotify and status == "watched"):
         xbmc.executebuiltin('Notification(Trakt,' + submitAlert + ',3000)')
     
 def transmit(status):
@@ -106,7 +118,7 @@ def transmit(status):
                       })
 
     f = urllib2.urlopen(req)
-    # TODO : add error handling
+    
 
 def Debug(message, Verbose=True):
     message = "TRAKT: " + message
@@ -122,30 +134,6 @@ def Debug(message, Verbose=True):
     elif (not Verbose):
         # repr() is used, got wierd issues with unicode otherwise, since we send mixed string types (eg: unicode and ascii) 
         print repr(message)
-
-def CheckVersion():
-    Version = ""
-    if (os.path.exists(VERSION_PATH)):
-        versionfile = file(VERSION_PATH, 'r')
-        Version = versionfile.read()        
-    return Version
-
-def WriteVersion(Version):
-    print Version
-    print VERSION_PATH
-    versionfile = file(VERSION_PATH, 'w')
-    versionfile.write (Version)
-    versionfile.close()
-
-def CheckIfFirstRun():
-    global CONFIG_PATH
-    if (os.path.exists(CONFIG_PATH)):
-        return False
-    else:
-        return True
-    
-def CheckIfUpgrade():
-    return False
 
 def CalcPercentageRemaining(currenttime, duration):
     try:
@@ -165,10 +153,46 @@ def CalcPercentageRemaining(currenttime, duration):
         Debug( 'Percentage of progress: null', True)
         return float(0.0)
 
+def SaveMediaState(media, timestamp, updatetype):
+    Debug( 'Saving ' + updatetype + ' media state with ' + media + ' ' + str(timestamp), True)
+    
+    if (updatetype == 'watching'):
+        state = ReadMediaState()
+        
+        if (state != False):
+            media, lastUpdate = state.split("::::")
+        else:
+            media = 'none'
+    
+    if (os.path.exists(TRAKT_SAVE_FOLDER_PATH) == False):
+        # create trakt folder in userdata dir
+        os.makedirs(TRAKT_SAVE_FOLDER_PATH)
+    
+    statefile = file(TRAKT_SAVE_PATH, 'w+')
+    statefile.writelines(media+"::::"+str(timestamp))
+
+def ReadMediaState():
+    Debug( 'Reading media save state ', True)
+    
+    if (os.path.exists(TRAKT_SAVE_FOLDER_PATH) == False):
+        return False
+        
+    if (os.path.exists(TRAKT_SAVE_PATH)):
+        Debug( 'Found save state file', True)
+        statefile = file(TRAKT_SAVE_PATH, 'r')
+        filecontents = statefile.readlines()
+        statefile.close()
+        for line in filecontents:
+            return line
+        
+    else:
+        return False
+    
+
 def SetAutoStart(bState = True):
     Debug( '::AutoStart::' + str(bState), True)
     if (os.path.exists(AUTOEXEC_PATH)):
-        Debug( 'Found Autoexec.py file, checking we''re there', True)
+        Debug( 'Found Autoexec.py file, checking we\'re there', True)
         bFound = False
         autoexecfile = file(AUTOEXEC_PATH, 'r')
         filecontents = autoexecfile.readlines()
@@ -188,7 +212,7 @@ def SetAutoStart(bState = True):
             Debug( 'Removing our script from the autoexec.py script', True)
             autoexecfile = file(AUTOEXEC_PATH, 'w')
             for line in filecontents:
-                if not line.find('xbTweet') > 0:
+                if not line.find('trakt') > 0:
                     autoexecfile.write(line)
             autoexecfile.close()            
     else:
@@ -204,23 +228,3 @@ def SetAutoStart(bState = True):
             autoexecfile.write (AUTOEXEC_SCRIPT.strip())
             autoexecfile.close()
     Debug( '::AutoStart::'  , True)
-
-#Check for new version
-# if __settings__.getSetting( "new_ver" ) == "true":
-#     try:
-#         import re
-#         import urllib
-#         if not xbmc.getCondVisibility('Player.Paused') : xbmc.Player().pause() #Pause if not paused	
-#         usock = urllib.urlopen(__svn_url__ + "default.py")
-#         htmlSource = usock.read()
-#         usock.close()
-# 
-#         version = re.search( "__version__.*?[\"'](.*?)[\"']",  htmlSource, re.IGNORECASE ).group(1)
-#         Debug ( "SVN Latest Version :[ "+version+"]", True)
-#         
-#         if version > __version__:
-#             import xbmcgui
-#             dialog = xbmcgui.Dialog()
-#             selected = dialog.ok(__language__(30002) % (str(__version__)),__language__(30003) % (str(version)),__language__(30004))
-#     except:
-#         print 'Exception in reading SVN'
