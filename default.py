@@ -188,7 +188,8 @@ if (not xbmc.getCondVisibility('videoplayer.isfullscreen') and not bShortcut and
 #Startup Execution 
 if ((bStartup and bAutoStart) or bRun):
     Debug(  'Entering idle state, waiting for media playing...', False)
-    if (bNotify)
+    
+    if (bNotify):
         xbmc.executebuiltin('Notification(Trakt,' + __language__(45050).encode( "utf-8", "ignore" ) + ',3000)')
 
     while 1:
