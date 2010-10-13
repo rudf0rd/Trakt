@@ -1,0 +1,7 @@
+Version 0.0.5
+	- startup notification now follows notification setting
+	- text fix on the settings menu
+	- added this changelog!
+
+Version 0.0.4
+	- initial public release

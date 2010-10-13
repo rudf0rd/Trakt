@@ -76,11 +76,6 @@ def CheckAndSubmit(Manual=False):
                     ',' + unicode(xbmc.getInfoLabel("VideoPlayer.Year"), 'utf-8') +
                     ',' + unicode(addPadding(xbmc.getInfoLabel("VideoPlayer.Season")), 'utf-8') +
                     ',' + unicode(addPadding(xbmc.getInfoLabel("VideoPlayer.Episode")), 'utf-8'))
-            # title = title.replace('%EPISODENAME%', unicode(xbmc.getInfoLabel("VideoPlayer.Title"), 'utf-8'))
-            # title = title.replace('%EPISODENUMBER%', unicode(xbmc.getInfoLabel("VideoPlayer.Episode"), 'utf-8'))
-            # title = title.replace('%EPISODENUMBER_PADDED%', unicode(addPadding(xbmc.getInfoLabel("VideoPlayer.Episode")), 'utf-8'))            
-            # title = title.replace('%SEASON%', , 'utf-8'))
-            # title = title.replace('%SEASON_PADDED%', unicode(addPadding(xbmc.getInfoLabel("VideoPlayer.Season")), 'utf-8'))
 
         elif len(xbmc.getInfoLabel("VideoPlayer.Title")) >= 1: #Movie
             sType = "Movie"
@@ -108,26 +103,20 @@ def CheckAndSubmit(Manual=False):
         
         Debug("Title: " + title)
         
-        # set lasttitle and lastUpdate from save state files
-        state = ReadMediaState()
-        
-        if (state != False):
-            lasttitle, lastUpdate = state.split("::::")
-        
-        if(time.time() - float(lastUpdate) >= 86400):
-            lastUpdate = 0
-            
-        if ((title != "" and lasttitle != title) and not bExcluded):
+        if ((title != "" and lasttitle != title)  and not bExcluded):
             iPercComp = CalcPercentageRemaining(xbmc.getInfoLabel("VideoPlayer.Time"), xbmc.getInfoLabel("VideoPlayer.Duration"))
             if (iPercComp > (float(VideoThreshold) / 100)):
                 Debug('Title: ' + title + ', sending watched status, current percentage: ' + str(iPercComp), True)
                 SendUpdate(title, sType, "watched")
-            elif (time.time() - float(lastUpdate) >= 900):
+                lasttitle = title
+            elif (time.time() - lastUpdate >= 900):
                 Debug('Title: ' + title + ', sending watching status, current percentage: ' + str(iPercComp), True)
                 SendUpdate(title, sType, "watching")
-            elif (title != "" and lasttitle != title and lasttitle != "none"):
-                Debug('Title: ' + title + ', sending watching status, current percentage: ' + str(iPercComp), True)
-                SendUpdate(title, sType, "watching")
+                lastUpdate = time.time();
+    
+    else:
+        Debug('Resetting last update timestamp')
+        lastUpdate = 0
     
 ###Path handling
 BASE_PATH = xbmc.translatePath( os.getcwd() )
@@ -153,11 +142,11 @@ bStartup = False
 bShortcut = False
 bUsername = False
 bPassword = False
-bNotify = False
 lasttitle = ""
 lastUpdate = 0
 
 bAutoStart = False
+bNotify = False
 bRunBackground = False
 bAutoSubmitVideo = False
 VideoThreshold = 0
@@ -191,8 +180,6 @@ Debug( 'VideoThreshold: ' + str(VideoThreshold), True)
 Debug( 'Startup: ' + str(bStartup), True)
 Debug( '::Settings::', True)
 
-###Initial checks
-
 ###Main logic
 if (not xbmc.getCondVisibility('videoplayer.isfullscreen') and not bShortcut and not bStartup):
     Debug(  'Pressed in scripts menu', False)        
@@ -200,12 +187,15 @@ if (not xbmc.getCondVisibility('videoplayer.isfullscreen') and not bShortcut and
 
 #Startup Execution 
 if ((bStartup and bAutoStart) or bRun):
-    
-    #If Set To AutoSubmit
-    if (bAutoSubmitVideo):
-        CheckAndSubmit()
-    
-    xbmc.executebuiltin('cancelalarm("trakt")')
-    xbmc.executebuiltin('alarmclock("trakt", xbmc.runscript(script.trakt), 1, True)') 
+    Debug(  'Entering idle state, waiting for media playing...', False)
+    if (bNotify)
+        xbmc.executebuiltin('Notification(Trakt,' + __language__(45050).encode( "utf-8", "ignore" ) + ',3000)')
+
+    while 1:
+        #If Set To AutoSubmit
+        if (bAutoSubmitVideo):
+            CheckAndSubmit()
+
+        time.sleep(15)
 
 Debug( 'Exiting...', False)
