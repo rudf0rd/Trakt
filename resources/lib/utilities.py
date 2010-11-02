@@ -3,6 +3,7 @@ import os
 import xbmc
 import xbmcaddon
 import string
+import time
 import urllib
 import urllib2
 
@@ -12,6 +13,8 @@ CONFIG_PATH = xbmc.translatePath( os.path.join( os.getcwd(), 'resources', 'setti
 AUTOEXEC_PATH = xbmc.translatePath( 'special://home/userdata/autoexec.py' )
 AUTOEXEC_FOLDER_PATH = xbmc.translatePath( 'special://home/userdata/' )
 VERSION_PATH = xbmc.translatePath( os.path.join( os.getcwd(), 'resources', 'version.cfg' ) )
+TRAKT_SAVE_FOLDER_PATH = xbmc.translatePath( 'special://home/userdata/trakt' )
+TRAKT_SAVE_PATH = xbmc.translatePath( 'special://home/userdata/trakt/lastupdate.txt' )
 
 #Consts
 AUTOEXEC_SCRIPT = '\nimport time;time.sleep(5);xbmc.executebuiltin("XBMC.RunScript(special://home/addons/script.trakt/default.py,-startup)")\n'
@@ -25,7 +28,8 @@ def SendUpdate(info, sType, status):
     
     bUsername = __settings__.getSetting( "Username" )
     bPassword = __settings__.getSetting( "Password" )
-    bNotify = __settings__.getSetting( "NotifyOnSubmit" )
+    bNotify = False
+    if (__settings__.getSetting( "NotifyOnSubmit" ) == 'true'): bNotify = True
     
     if (bUsername == '' or bPassword == ''):
         Debug("Username or password not set", False)
@@ -43,6 +47,9 @@ def SendUpdate(info, sType, status):
         submitAlert = __language__(45052).encode( "utf-8", "ignore" )
         submitAlert = submitAlert.replace('%MOVIENAME%', title)
         submitAlert = submitAlert.replace('%YEAR%', year)
+        
+        # create state to save
+        media = title+','+year
         
         toSend = urllib.urlencode({ "type": sType,
                                     "status": status,
@@ -66,6 +73,9 @@ def SendUpdate(info, sType, status):
         submitAlert = submitAlert.replace('%SEASON%', season)
         submitAlert = submitAlert.replace('%EPISODE%', episode)
         
+        # create state to save
+        media = title+','+year+','+season+','+episode
+        
         toSend = urllib.urlencode({ "type": sType,
                                     "status": status,
                                     "title": title, 
@@ -79,12 +89,14 @@ def SendUpdate(info, sType, status):
                                     "username": bUsername, 
                                     "password": bPassword})
         
+    SaveMediaState(media, time.time(), status)
+    
     Debug("Data: "+toSend, False)
     
     # send
     transmit(toSend)
     # and notify if wanted
-    if (bNotify == "true" and status == "watched"):
+    if (bNotify and status == "watched"):
         xbmc.executebuiltin('Notification(Trakt,' + submitAlert + ',3000)')
     
 def transmit(status):
@@ -104,9 +116,11 @@ def transmit(status):
             headers = { "Accept": "*/*",   
                         "User-Agent": "Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)", 
                       })
-
-    f = urllib2.urlopen(req)
-    # TODO : add error handling
+    try:
+        f = urllib2.urlopen(req)
+    except:
+        pass
+    
 
 def Debug(message, Verbose=True):
     message = "TRAKT: " + message
@@ -141,10 +155,46 @@ def CalcPercentageRemaining(currenttime, duration):
         Debug( 'Percentage of progress: null', True)
         return float(0.0)
 
+def SaveMediaState(media, timestamp, updatetype):
+    Debug( 'Saving ' + updatetype + ' media state with ' + media + ' ' + str(timestamp), True)
+    
+    if (updatetype == 'watching'):
+        state = ReadMediaState()
+        
+        if (state != False):
+            media, lastUpdate = state.split("::::")
+        else:
+            media = 'none'
+    
+    if (os.path.exists(TRAKT_SAVE_FOLDER_PATH) == False):
+        # create trakt folder in userdata dir
+        os.makedirs(TRAKT_SAVE_FOLDER_PATH)
+    
+    statefile = file(TRAKT_SAVE_PATH, 'w+')
+    statefile.writelines(media+"::::"+str(timestamp))
+
+def ReadMediaState():
+    Debug( 'Reading media save state ', True)
+    
+    if (os.path.exists(TRAKT_SAVE_FOLDER_PATH) == False):
+        return False
+        
+    if (os.path.exists(TRAKT_SAVE_PATH)):
+        Debug( 'Found save state file', True)
+        statefile = file(TRAKT_SAVE_PATH, 'r')
+        filecontents = statefile.readlines()
+        statefile.close()
+        for line in filecontents:
+            return line
+        
+    else:
+        return False
+    
+
 def SetAutoStart(bState = True):
     Debug( '::AutoStart::' + str(bState), True)
     if (os.path.exists(AUTOEXEC_PATH)):
-        Debug( 'Found Autoexec.py file, checking we''re there', True)
+        Debug( 'Found Autoexec.py file, checking we\'re there', True)
         bFound = False
         autoexecfile = file(AUTOEXEC_PATH, 'r')
         filecontents = autoexecfile.readlines()
