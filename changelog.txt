@@ -1,4 +1,7 @@
 Version 0.0.5
+	- changing over to an alarmclock based plugin
+	
+Version 0.0.5
 	- startup notification now follows notification setting
 	- text fix on the settings menu
 	- added this changelog!

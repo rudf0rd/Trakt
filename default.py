@@ -11,7 +11,7 @@ import string
 __scriptname__ = "trakt"
 __author__ = "Sean Rudford"
 __url__ = "http://trakt.tv/"
-__version__ = "0.0.5"
+__version__ = "0.0.6"
 __XBMC_Revision__ = ""
 
 def addPadding(number):

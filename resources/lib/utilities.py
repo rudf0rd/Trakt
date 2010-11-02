@@ -21,7 +21,7 @@ AUTOEXEC_SCRIPT = '\nimport time;time.sleep(5);xbmc.executebuiltin("XBMC.RunScri
 
 __settings__ = xbmcaddon.Addon(id='script.trakt')
 __language__ = __settings__.getLocalizedString
-__version__ = "0.0.5"
+__version__ = "0.0.6"
 
 def SendUpdate(info, sType, status):
     Debug("Creating data to send", False)
