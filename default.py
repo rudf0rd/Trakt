@@ -30,7 +30,7 @@ def CheckAndSubmit(Manual=False):
         bExcluded = False
         short = ""
         title = ""
-        getID = True
+        global getID
         global VideoThreshold
         global lasttitle
         global lastUpdate
@@ -166,6 +166,7 @@ bPassword = False
 lasttitle = ""
 lastUpdate = 0
 video_id = ""
+getID = True
 
 bAutoStart = False
 bNotify = False
