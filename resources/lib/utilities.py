@@ -2,6 +2,7 @@ import sys
 import os
 import xbmc
 import xbmcaddon
+import re
 import string
 import urllib
 import urllib2
@@ -34,12 +35,17 @@ def SendUpdate(info, progress, sType, status):
     
     Debug(info, False)
     
+    if (sType == "TVShow"):
+        ID = getID(sType, unicode(xbmc.getInfoLabel("VideoPlayer.TvShowTitle"), 'utf-8'))
+    elif (sType == "Movie"):
+        ID = getID(sType, unicode(xbmc.getInfoLabel("VideoPlayer.Title")))
+    
     # split on type and create data packet for each type
     if (sType == "Movie"):
         Debug("Parsing Movie", False)
         
         # format: title, year
-        title, year, imdbid = info.split(",")
+        title, year = info.split(",")
         
         # set alert text
         submitAlert = __language__(45052).encode( "utf-8", "ignore" )
@@ -50,7 +56,7 @@ def SendUpdate(info, progress, sType, status):
                                     "status": status,
                                     "title": title, 
                                     "year": year,
-                                    "imdbid": imdbid,
+                                    "imdbid": ID,
                                     "progress": progress,
                                     "plugin_version": __version__,
                                     "media_center": 'xbmc',
@@ -62,7 +68,7 @@ def SendUpdate(info, progress, sType, status):
         Debug("Parsing TVShow", False)
         
         # format: title, year, season, episode
-        title, year, season, episode, tvdbid = info.split(",")
+        title, year, season, episode = info.split(",")
         
         # set alert text
         submitAlert = __language__(45053).encode( "utf-8", "ignore" )
@@ -76,7 +82,7 @@ def SendUpdate(info, progress, sType, status):
                                     "year": year, 
                                     "season": season, 
                                     "episode": episode,
-                                    "tvdbid": tvdbid,
+                                    "tvdbid": ID,
                                     "progress": progress,
                                     "plugin_version": __version__,
                                     "media_center": 'xbmc',
@@ -200,3 +206,28 @@ def notification( header="", message="", sleep=5000, icon=__settings__.getAddonI
         in addition you can set the length of time it displays in milliseconds and a icon image. 
     """
     xbmc.executebuiltin( "XBMC.Notification(%s,%s,%i,%s)" % ( header, message, sleep, icon ) )
+    
+def getID(sType, title):
+    video_id = ""
+    if (sType == "TVShow"):
+        # get tvdb id
+        try:
+            query = "select c12 from tvshow where c00 = '" + title + "'"
+            res = xbmc.executehttpapi("queryvideodatabase(" + query + ")")
+            tvid = re.findall('[\d.]*\d+',res) # find it
+
+            if len(tvid[0].strip()) >= 1:
+                video_id = tvid[0].strip();
+        except:        
+            video_id = ""
+    else:
+        try:
+            query = "select case when not movie.c09 is null then movie.c09 else 'NOTFOUND' end as [MovieID] from movie where movie.c00 = '" + title + "' limit 1"
+            res = xbmc.executehttpapi("queryvideodatabase(" + query + ")")
+            movieid = re.findall('>(.*?)<',res) # find it
+            if len(movieid[1].strip()) >= 1:
+                video_id = str(movieid[1].strip())
+        except:
+            video_id = ""
+    
+    return video_id

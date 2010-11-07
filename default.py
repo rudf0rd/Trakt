@@ -6,7 +6,6 @@ import string
 import time
 import ConfigParser
 import string
-import re
 
 ###General vars
 __scriptname__ = "trakt"
@@ -30,15 +29,17 @@ def CheckAndSubmit(Manual=False):
         bExcluded = False
         short = ""
         title = ""
-        global getID
         global VideoThreshold
         global lasttitle
         global lastUpdate
-        global video_id
         
-        if(lasttitle == title and lasttitle != ""):
-            Debug('lasttitle == title, getID set to False', False)
-            getID = False
+        iPercComp = CalcPercentageRemaining(xbmc.getInfoLabel("VideoPlayer.Time"), xbmc.getInfoLabel("VideoPlayer.Duration"))
+        
+        if iPercComp > (float(VideoThreshold) / 100) or lastUpdate == 0:
+            # do nothing and let it continue to main script
+            Debug("continuing to main script")
+        elif (time.time() - lastUpdate < 900):
+            return
         
         pauseCheck = xbmc.Player().getTime()
         time.sleep(1)
@@ -75,45 +76,20 @@ def CheckAndSubmit(Manual=False):
         if len(xbmc.getInfoLabel("VideoPlayer.TVshowtitle")) >= 1: # TvShow
             sType = "TVShow"
             Debug("Found TV Show", False)
-            # get tvdb id
-            if (xbmc.getInfoLabel("VideoPlayer.Year") != "" and getID == True):
-                getID = False
-                try:
-                    query = "select c12 from tvshow where c00 = '" + unicode(xbmc.getInfoLabel("VideoPlayer.TvShowTitle"), 'utf-8') + "'"
-                    res = xbmc.executehttpapi("queryvideodatabase(" + query + ")")
-                    tvid = re.findall('[\d.]*\d+',res) # find it
-
-                    if len(tvid[0].strip()) >= 1:
-                        video_id = tvid[0].strip();
-                except:        
-                    video_id = ""
                 
             # format: title, year, season, episode, tvdbid
             title = (unicode(xbmc.getInfoLabel("VideoPlayer.TvShowTitle"), 'utf-8') +
                     ',' + unicode(xbmc.getInfoLabel("VideoPlayer.Year"), 'utf-8') +
                     ',' + unicode(addPadding(xbmc.getInfoLabel("VideoPlayer.Season")), 'utf-8') +
-                    ',' + unicode(addPadding(xbmc.getInfoLabel("VideoPlayer.Episode")), 'utf-8') +
-                    ',' + video_id)
+                    ',' + unicode(addPadding(xbmc.getInfoLabel("VideoPlayer.Episode")), 'utf-8'))
 
         elif len(xbmc.getInfoLabel("VideoPlayer.Title")) >= 1: #Movie
             sType = "Movie"
             Debug("Found Movie", False)
             
-            if (xbmc.getInfoLabel("VideoPlayer.Year") != "" and getID == True):
-                getID = False
-                try:
-                    query = "select case when not movie.c09 is null then movie.c09 else 'NOTFOUND' end as [MovieID] from movie where movie.c00 = '" + unicode(xbmc.getInfoLabel("VideoPlayer.Title")) + "' limit 1"
-                    res = xbmc.executehttpapi("queryvideodatabase(" + query + ")")
-                    movieid = re.findall('>(.*?)<',res) # find it
-                    if len(movieid[1].strip()) >= 1:
-                        video_id = str(movieid[1].strip())
-                except:       
-                    video_id = ""
-            
             # format: title, year
             title = (unicode(xbmc.getInfoLabel("VideoPlayer.Title"), 'utf-8') + ',' +
-                    unicode(xbmc.getInfoLabel("VideoPlayer.Year"), 'utf-8') + ',' +
-                    video_id)
+                    unicode(xbmc.getInfoLabel("VideoPlayer.Year"), 'utf-8'))
                 
             #don't submit if not in library
             if (xbmc.getInfoLabel("VideoPlayer.Year") == ""):
@@ -125,12 +101,11 @@ def CheckAndSubmit(Manual=False):
         
         Debug("Title: " + title)
         
-        if ((title != "" and lasttitle != title) and not bExcluded):
-            iPercComp = CalcPercentageRemaining(xbmc.getInfoLabel("VideoPlayer.Time"), xbmc.getInfoLabel("VideoPlayer.Duration"))
+        if ((title != "" and lasttitle != title) and not bExcluded):                
+            
             if (iPercComp > (float(VideoThreshold) / 100)):
                 Debug('Title: ' + title + ', sending watched status, current percentage: ' + str(iPercComp), True)
                 SendUpdate(title, int(iPercComp*100), sType, "watched")
-                getID = True
                 lasttitle = title
             elif (time.time() - lastUpdate >= 900):
                 Debug('Title: ' + title + ', sending watching status, current percentage: ' + str(iPercComp), True)
@@ -165,8 +140,6 @@ bUsername = False
 bPassword = False
 lasttitle = ""
 lastUpdate = 0
-video_id = ""
-getID = True
 
 bAutoStart = False
 bNotify = False
