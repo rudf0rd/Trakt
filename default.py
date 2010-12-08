@@ -155,21 +155,22 @@ def get_id(video_type):
             video_id = ""
 
 
+###Settings related parsing
+__settings__ = xbmcaddon.Addon(id='script.trakt')
+__language__ = __settings__.getLocalizedString
+_ = sys.modules[ "__main__" ].__language__
+__cwd__ = __settings__.getAddonInfo('path')
+
 ###Path handling
-BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( os.getcwd(), 'resources', 'lib' ) )
-LANGUAGE_RESOURCE_PATH = xbmc.translatePath( os.path.join( os.getcwd(), 'resources', 'language' ) )
-MEDIA_RESOURCE_PATH = xbmc.translatePath( os.path.join( os.getcwd(), 'resources', 'skins' ) )
+BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( __cwd__, 'resources', 'lib' ) )
+LANGUAGE_RESOURCE_PATH = xbmc.translatePath( os.path.join( __cwd__, 'resources', 'language' ) )
+MEDIA_RESOURCE_PATH = xbmc.translatePath( os.path.join( __cwd__, 'resources', 'skins' ) )
 sys.path.append (BASE_RESOURCE_PATH)
 sys.path.append (LANGUAGE_RESOURCE_PATH)
 
 from utilities import *
     
 Debug('----------- ' + __scriptname__ + ' by ' + __author__ + ', version ' + __version__ + ' -----------', False)
-
-###Settings related parsing
-__settings__ = xbmcaddon.Addon(id='script.trakt')
-__language__ = __settings__.getLocalizedString
-_ = sys.modules[ "__main__" ].__language__
 
 ###Vars and initial load
 bRun = True #Enter idle state waiting to submit
@@ -234,6 +235,6 @@ if ((bStartup and bAutoStart) or bRun):
         if (bAutoSubmitVideo):
             CheckAndSubmit()
 
-        time.sleep(180)
+        time.sleep(168)
 
 Debug( 'Exiting...', False)

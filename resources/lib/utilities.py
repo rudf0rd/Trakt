@@ -8,19 +8,20 @@ import urllib
 import urllib2
 from urllib2 import URLError
 
-#Path handling
-LANGUAGE_RESOURCE_PATH = xbmc.translatePath( os.path.join( os.getcwd(), 'resources', 'language' ) )
-CONFIG_PATH = xbmc.translatePath( os.path.join( os.getcwd(), 'resources', 'settings.cfg' ) )
-AUTOEXEC_PATH = xbmc.translatePath( 'special://home/userdata/autoexec.py' )
-AUTOEXEC_FOLDER_PATH = xbmc.translatePath( 'special://home/userdata/' )
-VERSION_PATH = xbmc.translatePath( os.path.join( os.getcwd(), 'resources', 'version.cfg' ) )
-
-#Consts
-AUTOEXEC_SCRIPT = '\nimport time;time.sleep(5);xbmc.executebuiltin("XBMC.RunScript(special://home/addons/script.trakt/default.py,-startup)")\n'
-
 __settings__ = xbmcaddon.Addon(id='script.trakt')
 __language__ = __settings__.getLocalizedString
 __version__ = "0.0.7"
+__cwd__ = __settings__.getAddonInfo('path')
+
+#Path handling
+LANGUAGE_RESOURCE_PATH = xbmc.translatePath( os.path.join( __cwd__, 'resources', 'language' ) )
+CONFIG_PATH = xbmc.translatePath( os.path.join( __cwd__, 'resources', 'settings.cfg' ) )
+AUTOEXEC_PATH = xbmc.translatePath( 'special://home/userdata/autoexec.py' )
+AUTOEXEC_FOLDER_PATH = xbmc.translatePath( 'special://home/userdata/' )
+VERSION_PATH = xbmc.translatePath( os.path.join( __cwd__, 'resources', 'version.cfg' ) )
+
+#Consts
+AUTOEXEC_SCRIPT = '\nimport time;time.sleep(5);xbmc.executebuiltin("XBMC.RunScript(special://home/addons/script.trakt/default.py,-startup)")\n'
 
 def SendUpdate(info, progress, sType, status):
     Debug("Creating data to send", False)
