@@ -234,6 +234,6 @@ if ((bStartup and bAutoStart) or bRun):
         if (bAutoSubmitVideo):
             CheckAndSubmit()
 
-        time.sleep(15)
+        time.sleep(180)
 
 Debug( 'Exiting...', False)
