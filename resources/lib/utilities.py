@@ -103,7 +103,7 @@ def SendUpdate(info, progress, sType, status):
 def transmit(status):
     bNotify = __settings__.getSetting( "NotifyOnSubmit" )
 
-    req = urllib2.Request("http://dev.trakt.tv/api",
+    req = urllib2.Request("http://api.trakt.tv/post",
             status,
             headers = { "Accept": "*/*",   
                         "User-Agent": "Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)", 
