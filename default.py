@@ -36,10 +36,6 @@ def CheckAndSubmit(Manual=False):
         global lastUpdate
         global video_id
         
-        if(lasttitle == title and lasttitle != ""):
-            Debug('lasttitle == title, getID set to False', False)
-            getID = False
-        
         iPercComp = CalcPercentageRemaining(xbmc.getInfoLabel("VideoPlayer.Time"), xbmc.getInfoLabel("VideoPlayer.Duration"))
         
         if iPercComp > (float(VideoThreshold) / 100) or lastUpdate == 0:
@@ -84,51 +80,23 @@ def CheckAndSubmit(Manual=False):
             sType = "TVShow"
             Debug("Found TV Show", False)
             
-            # get tvdb id
-            if (xbmc.getInfoLabel("VideoPlayer.Year") != "" and getID == True):
-                getID = False
-                Debug("Looking up TVDB ID", False)
-                try:
-                    query = "select c12 from tvshow where c00 = '" + unicode(xbmc.getInfoLabel("VideoPlayer.TvShowTitle"), 'utf-8') + "'"
-                    res = xbmc.executehttpapi("queryvideodatabase(" + query + ")")
-                    Debug(res, False)
-                    tvid = re.findall('[\d.]*\d+',res) # find it
-
-                    if len(tvid[0].strip()) >= 1:
-                        video_id = tvid[0].strip();
-                except:
-                    video_id = ""
-            
             # format: title, year, season, episode, tvdbid
             showname = xbmc.getInfoLabel("VideoPlayer.TvShowTitle")
             showname = showname.replace(",", '')
             title = (showname +
                     ',' + xbmc.getInfoLabel("VideoPlayer.Year") +
                     ',' + addPadding(xbmc.getInfoLabel("VideoPlayer.Season")) +
-                    ',' + addPadding(xbmc.getInfoLabel("VideoPlayer.Episode")) +
-                    ',' + video_id)
+                    ',' + addPadding(xbmc.getInfoLabel("VideoPlayer.Episode")))
 
         elif len(xbmc.getInfoLabel("VideoPlayer.Title")) >= 1: #Movie
             sType = "Movie"
             Debug("Found Movie", False)
             
-            if (xbmc.getInfoLabel("VideoPlayer.Year") != "" and getID == True):
-                getID = False
-                try:
-                    query = "select case when not movie.c09 is null then movie.c09 else 'NOTFOUND' end as [MovieID] from movie where movie.c00 = '" + xbmc.getInfoLabel("VideoPlayer.Title") + "' limit 1"
-                    res = xbmc.executehttpapi("queryvideodatabase(" + query + ")")
-                    Debug(res, True)
-                    movieid = re.findall('>(.*?)<',res) # find it
-                    if len(movieid[1].strip()) >= 1:
-                        video_id = str(movieid[1].strip())
-                except:
-                    video_id = ""
-            
             # format: title, year
             moviename = xbmc.getInfoLabel("VideoPlayer.TvShowTitle")
             moviename = moviename.replace(",", '')
             
-            title = (moviename + ',' + xbmc.getInfoLabel("VideoPlayer.Year") + "," + video_id)
+            title = (moviename + ',' + xbmc.getInfoLabel("VideoPlayer.Year"))
                 
             #don't submit if not in library
             if (xbmc.getInfoLabel("VideoPlayer.Year") == ""):
@@ -141,20 +109,52 @@ def CheckAndSubmit(Manual=False):
         Debug("Title: " + title)
         
         if ((title != "" and lasttitle != title) and not bExcluded):                
+            get_id(sType)
             
             if (iPercComp > (float(VideoThreshold) / 100)):
                 Debug('Title: ' + title + ', sending watched status, current percentage: ' + str(iPercComp), True)
-                SendUpdate(title, int(iPercComp*100), sType, "watched")
+                SendUpdate(title+","+video_id, int(iPercComp*100), sType, "watched")
                 lasttitle = title
             elif (time.time() - lastUpdate >= 900):
                 Debug('Title: ' + title + ', sending watching status, current percentage: ' + str(iPercComp), True)
-                SendUpdate(title, int(iPercComp*100), sType, "watching")
+                SendUpdate(title+","+video_id, int(iPercComp*100), sType, "watching")
                 lastUpdate = time.time();
     
     else:
         Debug('Resetting last update timestamp')
         lastUpdate = 0
+        getID = True
+
+
+def get_id(video_type):
+    global getID
+    global video_id
     
+    getID = False
+    Debug("Looking up video ID (tvdb or imdb)", False)
+    
+    if video_type == "Movie":
+        try:
+            query = "select case when not movie.c09 is null then movie.c09 else 'NOTFOUND' end as [MovieID] from movie where movie.c00 = '" + xbmc.getInfoLabel("VideoPlayer.Title") + "' limit 1"
+            res = xbmc.executehttpapi("queryvideodatabase(" + query + ")")
+            movieid = re.findall('>(.*?)<',res) # find it
+            if len(movieid[1].strip()) >= 1:
+                video_id = str(movieid[1].strip())
+        except:
+            video_id = ""
+            
+    elif video_type == "TVShow":
+        try:
+            query = "select c12 from tvshow where c00 = '" + xbmc.getInfoLabel("VideoPlayer.TvShowTitle") + "'"
+            res = xbmc.executehttpapi("queryvideodatabase(" + query + ")")
+            tvid = re.findall('[\d.]*\d+',res) # find it
+
+            if len(tvid[0].strip()) >= 1:
+                video_id = tvid[0].strip();
+        except:
+            video_id = ""
+
+
 ###Path handling
 BASE_RESOURCE_PATH = xbmc.translatePath( os.path.join( os.getcwd(), 'resources', 'lib' ) )
 LANGUAGE_RESOURCE_PATH = xbmc.translatePath( os.path.join( os.getcwd(), 'resources', 'language' ) )
