@@ -6,6 +6,7 @@ import re
 import string
 import urllib
 import urllib2
+from urllib2 import URLError
 
 #Path handling
 LANGUAGE_RESOURCE_PATH = xbmc.translatePath( os.path.join( os.getcwd(), 'resources', 'language' ) )
@@ -19,7 +20,7 @@ AUTOEXEC_SCRIPT = '\nimport time;time.sleep(5);xbmc.executebuiltin("XBMC.RunScri
 
 __settings__ = xbmcaddon.Addon(id='script.trakt')
 __language__ = __settings__.getLocalizedString
-__version__ = "0.0.6"
+__version__ = "0.0.7"
 
 def SendUpdate(info, progress, sType, status):
     Debug("Creating data to send", False)
@@ -101,18 +102,8 @@ def SendUpdate(info, progress, sType, status):
     
 def transmit(status):
     bNotify = __settings__.getSetting( "NotifyOnSubmit" )
-    # may use this later if other auth methods suck
-    # def basic_authorization(user, password):
-    #         bUsername = __settings__.getSetting( "Username" )
-    #         bPassword = __settings__.getSetting( "Password" )
-    #         if(bUsername == '' || bPassword == '')
-    #             xbmc.executebuiltin('Notification(Trakt,' + __language__(45051).encode( "utf-8", "ignore" ) + ',3000)')
-    #             return false
-    #         
-    #         s = user + ":" + password
-    #         return "Basic " + s.encode("base64").rstrip()
 
-    req = urllib2.Request("http://api.trakt.tv/post",
+    req = urllib2.Request("http://dev.trakt.tv/api",
             status,
             headers = { "Accept": "*/*",   
                         "User-Agent": "Mozilla/4.0 (compatible; MSIE 5.5; Windows NT)", 
@@ -120,10 +111,17 @@ def transmit(status):
 
     try:
         f = urllib2.urlopen(req)
-    
+        response = f.read()
+        Debug("Return packet: "+response)
+        
+    except URLError, e:
+        if e.code == 401:
+            Debug("Bad username or password", False)
+            if (bNotify == "true"):
+                notification("Trakt: Bad Authentication!", "Check your login information", 5000, __settings__.getAddonInfo("icon"))
+                
     except:
-        # do nothing 'cept spit out error
-        Debug("", False)
+        # do nothing 'cept spit out error (catch all)
         if (bNotify == "true"):
             notification("Trakt", "Error sending status.  API may not be reachable", 10000, __settings__.getAddonInfo("icon"))
 

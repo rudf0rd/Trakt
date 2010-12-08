@@ -1,3 +1,9 @@
+Version 0.0.7
+	- fixed double submit
+	- added error handling for bad user/pass
+	- fixed unicode issue with special characters in show name
+	- added German translation thanks to BurningSky!
+
 Version 0.0.6
 	- added icon to notifications
 	- now sending video progress % to api

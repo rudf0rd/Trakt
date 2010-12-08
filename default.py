@@ -11,7 +11,7 @@ import string
 __scriptname__ = "trakt"
 __author__ = "Sean Rudford"
 __url__ = "http://trakt.tv/"
-__version__ = "0.0.6"
+__version__ = "0.0.7"
 __XBMC_Revision__ = ""
 
 def addPadding(number):
@@ -78,18 +78,22 @@ def CheckAndSubmit(Manual=False):
             Debug("Found TV Show", False)
                 
             # format: title, year, season, episode, tvdbid
-            title = (unicode(xbmc.getInfoLabel("VideoPlayer.TvShowTitle"), 'utf-8') +
-                    ',' + unicode(xbmc.getInfoLabel("VideoPlayer.Year"), 'utf-8') +
-                    ',' + unicode(addPadding(xbmc.getInfoLabel("VideoPlayer.Season")), 'utf-8') +
-                    ',' + unicode(addPadding(xbmc.getInfoLabel("VideoPlayer.Episode")), 'utf-8'))
+            showname = xbmc.getInfoLabel("VideoPlayer.TvShowTitle")
+            showname = showname.replace(",", '')
+            title = (showname +
+                    ',' + xbmc.getInfoLabel("VideoPlayer.Year") +
+                    ',' + addPadding(xbmc.getInfoLabel("VideoPlayer.Season")) +
+                    ',' + addPadding(xbmc.getInfoLabel("VideoPlayer.Episode")))
 
         elif len(xbmc.getInfoLabel("VideoPlayer.Title")) >= 1: #Movie
             sType = "Movie"
             Debug("Found Movie", False)
             
             # format: title, year
-            title = (unicode(xbmc.getInfoLabel("VideoPlayer.Title"), 'utf-8') + ',' +
-                    unicode(xbmc.getInfoLabel("VideoPlayer.Year"), 'utf-8'))
+            moviename = xbmc.getInfoLabel("VideoPlayer.TvShowTitle")
+            moviename = moviename.replace(",", '')
+            
+            title = (moviename + ',' + xbmc.getInfoLabel("VideoPlayer.Year"))
                 
             #don't submit if not in library
             if (xbmc.getInfoLabel("VideoPlayer.Year") == ""):
