@@ -46,7 +46,7 @@ def SendUpdate(info, progress, sType, status):
         Debug("Parsing Movie", False)
         
         # format: title, year
-        title, year = info.split(",")
+        title, year, ID = info.split(",")
         
         # set alert text
         submitAlert = __language__(45052).encode( "utf-8", "ignore" )
@@ -69,7 +69,7 @@ def SendUpdate(info, progress, sType, status):
         Debug("Parsing TVShow", False)
         
         # format: title, year, season, episode
-        title, year, season, episode = info.split(",")
+        title, year, season, episode, ID = info.split(",")
         
         # set alert text
         submitAlert = __language__(45053).encode( "utf-8", "ignore" )
@@ -79,7 +79,7 @@ def SendUpdate(info, progress, sType, status):
         
         toSend = urllib.urlencode({ "type": sType,
                                     "status": status,
-                                    "title": title, 
+                                    "title": "blahblhahllaah", 
                                     "year": year, 
                                     "season": season, 
                                     "episode": episode,

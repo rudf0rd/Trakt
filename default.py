@@ -6,6 +6,7 @@ import string
 import time
 import ConfigParser
 import string
+import re
 
 ###General vars
 __scriptname__ = "trakt"
@@ -29,9 +30,15 @@ def CheckAndSubmit(Manual=False):
         bExcluded = False
         short = ""
         title = ""
+        global getID
         global VideoThreshold
         global lasttitle
         global lastUpdate
+        global video_id
+        
+        if(lasttitle == title and lasttitle != ""):
+            Debug('lasttitle == title, getID set to False', False)
+            getID = False
         
         iPercComp = CalcPercentageRemaining(xbmc.getInfoLabel("VideoPlayer.Time"), xbmc.getInfoLabel("VideoPlayer.Duration"))
         
@@ -76,24 +83,54 @@ def CheckAndSubmit(Manual=False):
         if len(xbmc.getInfoLabel("VideoPlayer.TVshowtitle")) >= 1: # TvShow
             sType = "TVShow"
             Debug("Found TV Show", False)
-                
+            
+            # get tvdb id
+            if (xbmc.getInfoLabel("VideoPlayer.Year") != "" and getID == True):
+                getID = False
+                Debug("Looking up TVDB ID", False)
+                try:
+                    query = "select c12 from tvshow where c00 = '" + unicode(xbmc.getInfoLabel("VideoPlayer.TvShowTitle"), 'utf-8') + "'"
+                    res = xbmc.executehttpapi("queryvideodatabase(" + query + ")")
+                    Debug(res, False)
+                    tvid = re.findall('[\d.]*\d+',res) # find it
+
+                    if len(tvid[0].strip()) >= 1:
+                        video_id = tvid[0].strip();
+                except:
+                    video_id = ""
+            
             # format: title, year, season, episode, tvdbid
             showname = xbmc.getInfoLabel("VideoPlayer.TvShowTitle")
             showname = showname.replace(",", '')
             title = (showname +
                     ',' + xbmc.getInfoLabel("VideoPlayer.Year") +
                     ',' + addPadding(xbmc.getInfoLabel("VideoPlayer.Season")) +
-                    ',' + addPadding(xbmc.getInfoLabel("VideoPlayer.Episode")))
+                    ',' + addPadding(xbmc.getInfoLabel("VideoPlayer.Episode")) +
+                    ',' + video_id)
 
         elif len(xbmc.getInfoLabel("VideoPlayer.Title")) >= 1: #Movie
             sType = "Movie"
             Debug("Found Movie", False)
             
+            if (xbmc.getInfoLabel("VideoPlayer.Year") != "" and getID == True):
+                getID = False
+                try:
+                    query = "select case when not movie.c09 is null then movie.c09 else 'NOTFOUND' end as [MovieID] from movie where movie.c00 = '" + xbmc.getInfoLabel("VideoPlayer.Title") + "' limit 1"
+                    res = xbmc.executehttpapi("queryvideodatabase(" + query + ")")
+                    # query = '{"jsonrpc": "2.0", "method": "VideoLibrary.GetMovies", "params": { "start": 0, "fields": ["title", "year"] }, "id": "1"}'
+                    # res = xbmc.executeJSONRPC(query)
+                    Debug(res, True)
+                    movieid = re.findall('>(.*?)<',res) # find it
+                    if len(movieid[1].strip()) >= 1:
+                        video_id = str(movieid[1].strip())
+                except:
+                    video_id = ""
+            
             # format: title, year
             moviename = xbmc.getInfoLabel("VideoPlayer.TvShowTitle")
             moviename = moviename.replace(",", '')
             
-            title = (moviename + ',' + xbmc.getInfoLabel("VideoPlayer.Year"))
+            title = (moviename + ',' + xbmc.getInfoLabel("VideoPlayer.Year") + "," + video_id)
                 
             #don't submit if not in library
             if (xbmc.getInfoLabel("VideoPlayer.Year") == ""):
@@ -144,6 +181,8 @@ bUsername = False
 bPassword = False
 lasttitle = ""
 lastUpdate = 0
+video_id = ""
+getID = True
 
 bAutoStart = False
 bNotify = False
