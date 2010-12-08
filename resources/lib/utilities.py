@@ -79,7 +79,7 @@ def SendUpdate(info, progress, sType, status):
         
         toSend = urllib.urlencode({ "type": sType,
                                     "status": status,
-                                    "title": "blahblhahllaah", 
+                                    "title": title, 
                                     "year": year, 
                                     "season": season, 
                                     "episode": episode,

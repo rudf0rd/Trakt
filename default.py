@@ -117,8 +117,6 @@ def CheckAndSubmit(Manual=False):
                 try:
                     query = "select case when not movie.c09 is null then movie.c09 else 'NOTFOUND' end as [MovieID] from movie where movie.c00 = '" + xbmc.getInfoLabel("VideoPlayer.Title") + "' limit 1"
                     res = xbmc.executehttpapi("queryvideodatabase(" + query + ")")
-                    # query = '{"jsonrpc": "2.0", "method": "VideoLibrary.GetMovies", "params": { "start": 0, "fields": ["title", "year"] }, "id": "1"}'
-                    # res = xbmc.executeJSONRPC(query)
                     Debug(res, True)
                     movieid = re.findall('>(.*?)<',res) # find it
                     if len(movieid[1].strip()) >= 1:
