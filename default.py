@@ -93,7 +93,7 @@ def CheckAndSubmit(Manual=False):
             Debug("Found Movie", False)
             
             # format: title, year
-            moviename = xbmc.getInfoLabel("VideoPlayer.TvShowTitle")
+            moviename = xbmc.getInfoLabel("VideoPlayer.Title")
             moviename = moviename.replace(",", '')
             
             title = (moviename + ',' + xbmc.getInfoLabel("VideoPlayer.Year"))
