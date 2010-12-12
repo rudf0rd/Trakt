@@ -35,14 +35,7 @@ def CheckAndSubmit(Manual=False):
         global lasttitle
         global lastUpdate
         global video_id
-        
-        iPercComp = CalcPercentageRemaining(xbmc.getInfoLabel("VideoPlayer.Time"), xbmc.getInfoLabel("VideoPlayer.Duration"))
-        
-        if iPercComp > (float(VideoThreshold) / 100) or lastUpdate == 0:
-            # do nothing and let it continue to main script
-            Debug("continuing to main script")
-        elif (time.time() - lastUpdate < 900):
-            return
+        global sleepTime
         
         pauseCheck = xbmc.Player().getTime()
         time.sleep(1)
@@ -108,6 +101,14 @@ def CheckAndSubmit(Manual=False):
         
         Debug("Title: " + title)
         
+        iPercComp = CalcPercentageRemaining(xbmc.getInfoLabel("VideoPlayer.Time"), xbmc.getInfoLabel("VideoPlayer.Duration"))
+        
+        if iPercComp > (float(VideoThreshold) / 100) or (lastUpdate == 0 and lasttitle == title):
+            # do nothing and let it continue to main script
+            Debug("continuing to send check")
+        elif (time.time() - lastUpdate < 900):
+            return
+        
         if ((title != "" and lasttitle != title) and not bExcluded):                
             get_id(sType)
             
@@ -115,14 +116,17 @@ def CheckAndSubmit(Manual=False):
                 Debug('Title: ' + title + ', sending watched status, current percentage: ' + str(iPercComp), True)
                 SendUpdate(title+","+video_id, int(iPercComp*100), sType, "watched")
                 lasttitle = title
+                sleepTime = 15
             elif (time.time() - lastUpdate >= 900):
                 Debug('Title: ' + title + ', sending watching status, current percentage: ' + str(iPercComp), True)
                 SendUpdate(title+","+video_id, int(iPercComp*100), sType, "watching")
                 lastUpdate = time.time();
+                sleepTime = 168
     
     else:
         Debug('Resetting last update timestamp')
         lastUpdate = 0
+        sleepTime = 15
         getID = True
 
 
@@ -182,6 +186,7 @@ lasttitle = ""
 lastUpdate = 0
 video_id = ""
 getID = True
+sleepTime = 168
 
 bAutoStart = False
 bNotify = False
@@ -235,6 +240,6 @@ if ((bStartup and bAutoStart) or bRun):
         if (bAutoSubmitVideo):
             CheckAndSubmit()
 
-        time.sleep(168)
+        time.sleep(sleepTime)
 
 Debug( 'Exiting...', False)
