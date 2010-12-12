@@ -36,6 +36,16 @@ def CheckAndSubmit(Manual=False):
         global lastUpdate
         global video_id
         global sleepTime
+        global checkTitle
+        
+        iPercComp = CalcPercentageRemaining(xbmc.getInfoLabel("VideoPlayer.Time"), xbmc.getInfoLabel("VideoPlayer.Duration"))
+
+        if iPercComp > (float(VideoThreshold) / 100) or lastUpdate == 0 or checkTitle != xbmc.getInfoLabel("VideoPlayer.Title"):
+            # do nothing and let it continue to main script
+            lastUpdate = 0
+            Debug("continuing to send check")
+        elif (time.time() - lastUpdate < 900):
+            return
         
         pauseCheck = xbmc.Player().getTime()
         time.sleep(1)
@@ -101,14 +111,6 @@ def CheckAndSubmit(Manual=False):
         
         Debug("Title: " + title)
         
-        iPercComp = CalcPercentageRemaining(xbmc.getInfoLabel("VideoPlayer.Time"), xbmc.getInfoLabel("VideoPlayer.Duration"))
-        
-        if iPercComp > (float(VideoThreshold) / 100) or (lastUpdate == 0 and lasttitle == title):
-            # do nothing and let it continue to main script
-            Debug("continuing to send check")
-        elif (time.time() - lastUpdate < 900):
-            return
-        
         if ((title != "" and lasttitle != title) and not bExcluded):                
             get_id(sType)
             
@@ -116,11 +118,13 @@ def CheckAndSubmit(Manual=False):
                 Debug('Title: ' + title + ', sending watched status, current percentage: ' + str(iPercComp), True)
                 SendUpdate(title+","+video_id, int(iPercComp*100), sType, "watched")
                 lasttitle = title
+                checkTitle = xbmc.getInfoLabel("VideoPlayer.Title")
                 sleepTime = 15
             elif (time.time() - lastUpdate >= 900):
                 Debug('Title: ' + title + ', sending watching status, current percentage: ' + str(iPercComp), True)
                 SendUpdate(title+","+video_id, int(iPercComp*100), sType, "watching")
                 lastUpdate = time.time();
+                checkTitle = xbmc.getInfoLabel("VideoPlayer.Title")
                 sleepTime = 168
     
     else:
@@ -187,6 +191,7 @@ lastUpdate = 0
 video_id = ""
 getID = True
 sleepTime = 168
+checkTitle = ''
 
 bAutoStart = False
 bNotify = False
