@@ -18,7 +18,7 @@ except ImportError:
 
 __settings__ = xbmcaddon.Addon(id='script.trakt')
 __language__ = __settings__.getLocalizedString
-__version__ = "0.0.9"
+__version__ = "0.1"
 __cwd__ = __settings__.getAddonInfo('path')
 
 #Path handling
@@ -58,6 +58,11 @@ def SendUpdate(info, progress, sType, status):
         # format: title, year
         title, year, ID = info.split(",")
         
+        # check to make sure the data is there
+        # otherwise return
+        if(title == ''):
+            return
+        
         # set alert text
         submitAlert = __language__(45052).encode( "utf-8", "ignore" )
         submitAlert = submitAlert.replace('%MOVIENAME%', title)
@@ -80,6 +85,11 @@ def SendUpdate(info, progress, sType, status):
         
         # format: title, year, season, episode
         title, year, season, episode, ID = info.split(",")
+        
+        # check to make sure the data is there
+        # otherwise return
+        if(title == '' or season == '' or episode == ''):
+            return
         
         # set alert text
         submitAlert = __language__(45053).encode( "utf-8", "ignore" )

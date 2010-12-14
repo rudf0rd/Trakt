@@ -12,7 +12,7 @@ import re
 __scriptname__ = "trakt"
 __author__ = "Sean Rudford"
 __url__ = "http://trakt.tv/"
-__version__ = "0.0.9"
+__version__ = "0.1"
 __XBMC_Revision__ = ""
 
 def addPadding(number):
@@ -57,9 +57,6 @@ def CheckAndSubmit(Manual=False):
             Debug('Video ended during pause check', False)
             return
         
-        if (xbmc.getInfoLabel("VideoPlayer.Year") == ""):
-            Debug('Video is not in library', False)
-            bLibraryExcluded = True
         if ((xbmc.getInfoLabel("VideoPlayer.mpaa") == "XXX")):
             Debug('Video is with XXX mpaa rating', False)
             bRatingExcluded = True
@@ -244,7 +241,10 @@ if ((bStartup and bAutoStart) or bRun):
         #If Set To AutoSubmit
         if (bAutoSubmitVideo):
             CheckAndSubmit()
-
+        
+        if (xbmc.abortRequested):
+            break
+            
         time.sleep(sleepTime)
 
 Debug( 'Exiting...', False)
