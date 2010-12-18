@@ -78,6 +78,7 @@ def SendUpdate(info, progress, sType, status):
                                     "media_center": 'xbmc',
                                     "media_center_version": xbmc.getInfoLabel( "system.buildversion" ),
                                     "media_center_date": xbmc.getInfoLabel( "system.builddate" ),
+                                    "duration": xbmc.getInfoLabel("VideoPlayer.Duration"),
                                     "username": bUsername, 
                                     "password": bPassword})
     elif (sType == "TVShow"):
@@ -109,6 +110,7 @@ def SendUpdate(info, progress, sType, status):
                                     "media_center": 'xbmc',
                                     "media_center_version": xbmc.getInfoLabel( "system.buildversion" ),
                                     "media_center_date": xbmc.getInfoLabel( "system.builddate" ),
+                                    "duration": xbmc.getInfoLabel("VideoPlayer.Duration"),
                                     "username": bUsername, 
                                     "password": bPassword})
         
@@ -163,7 +165,7 @@ def Debug(message, Verbose=True):
 
 def CalcPercentageRemaining(currenttime, duration):
     try:
-         iCurrentMinutes = (int(currenttime.split(':')[0]) * 60) + int(currenttime.split(':')[1])
+        iCurrentMinutes = (int(currenttime.split(':')[0]) * 60) + int(currenttime.split(':')[1])
     except:
         iCurrentMinutes = int(0)
         
