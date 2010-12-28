@@ -107,13 +107,13 @@ def CheckAndSubmit(Manual=False):
             
             if (iPercComp > (float(VideoThreshold) / 100)):
                 Debug('Title: ' + title + ', sending watched status, current percentage: ' + str(iPercComp), True)
-                SendUpdate(title+","+video_id, int(iPercComp*100), sType, "watched")
+                SendUpdate(title, int(iPercComp*100), sType, "watched")
                 lasttitle = title
                 checkTitle = xbmc.getInfoLabel("VideoPlayer.Title")
                 sleepTime = 15
             elif (time.time() - lastUpdate >= 900):
                 Debug('Title: ' + title + ', sending watching status, current percentage: ' + str(iPercComp), True)
-                SendUpdate(title+","+video_id, int(iPercComp*100), sType, "watching")
+                SendUpdate(title, int(iPercComp*100), sType, "watching")
                 lastUpdate = time.time();
                 checkTitle = xbmc.getInfoLabel("VideoPlayer.Title")
                 sleepTime = 168
