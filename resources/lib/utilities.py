@@ -49,7 +49,7 @@ def SendUpdate(info, progress, sType, status):
     if (sType == "TVShow"):
         ID = getID(sType, unicode(xbmc.getInfoLabel("VideoPlayer.TvShowTitle"), 'utf-8'))
     elif (sType == "Movie"):
-        ID = getID(sType, unicode(xbmc.getInfoLabel("VideoPlayer.Title"), 'utf-8')) 
+        ID = getID(sType, urllib.quote(xbmc.getInfoLabel("VideoPlayer.Title"))) 
     
     Debug("IMDB/tvdb id: "+ID);
     
@@ -230,25 +230,27 @@ def notification( header="", message="", sleep=5000, icon=__settings__.getAddonI
     xbmc.executebuiltin( "XBMC.Notification(%s,%s,%i,%s)" % ( header, message, sleep, icon ) )
     
 def getID(sType, title):
+    Debug("Title sent to getID: "+title, False)
     video_id = ""
     if (sType == "TVShow"):
         # get tvdb id
         try:
-            query = "select c12 from tvshow where c00 = '" + title + "'"
+            query = "select c12 from tvshow where lower(c00) = lower('" + title + "') limit 1"
             res = xbmc.executehttpapi("queryvideodatabase(" + query + ")")
             tvid = re.findall('[\d.]*\d+',res) # find it
 
-            if len(tvid[0].strip()) >= 1:
-                video_id = tvid[0].strip();
+            if len(tvid[0]) >= 1:
+                video_id = tvid[0];
         except:        
             video_id = ""
     else:
         try:
-            query = "select movie.c09 from movie where movie.c00 = '" + title + "' limit 1"
+            query = "select movie.c09 from movie where lower(movie.c00) = lower('" + title + "') limit 1"
             res = xbmc.executehttpapi("queryvideodatabase(" + query + ")")
             movieid = re.findall('>(.*?)<',res) # find it
-            if len(movieid[1].strip()) >= 1:
-                video_id = str(movieid[1].strip())
+
+            if len(movieid[0]) >= 1:
+                video_id = str(movieid[0])
         except:
             video_id = ""
     
