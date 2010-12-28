@@ -239,17 +239,23 @@ def getID(sType, title):
             res = xbmc.executehttpapi("queryvideodatabase(" + query + ")")
             tvid = re.findall('[\d.]*\d+',res) # find it
 
-            if len(tvid[0]) >= 1:
-                video_id = tvid[0];
+            if len(tvid[0].strip()) >= 1:
+                video_id = tvid[0].strip();
         except:        
             video_id = ""
     else:
         try:
             query = "select movie.c09 from movie where lower(movie.c00) = lower('" + title + "') limit 1"
+            Debug(query)
             res = xbmc.executehttpapi("queryvideodatabase(" + query + ")")
+            Debug(res)
             movieid = re.findall('>(.*?)<',res) # find it
+            Debug("reg 0: "+str(movieid[0]))
+
+            print repr(len(movieid[0]))
 
             if len(movieid[0]) >= 1:
+                Debug("reg 0: "+str(movieid[0]))
                 video_id = str(movieid[0])
         except:
             video_id = ""
