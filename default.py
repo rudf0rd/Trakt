@@ -30,7 +30,6 @@ def CheckAndSubmit(Manual=False):
         bExcluded = False
         short = ""
         title = ""
-        global getID
         global VideoThreshold
         global lasttitle
         global lastUpdate
@@ -97,10 +96,6 @@ def CheckAndSubmit(Manual=False):
             moviename = moviename.replace(",", '')
             
             title = (moviename + ',' + xbmc.getInfoLabel("VideoPlayer.Year"))
-                
-            #don't submit if not in library
-            if (xbmc.getInfoLabel("VideoPlayer.Year") == ""):
-                title = ""
 
         if (bLibraryExcluded or bPathExcluded or bRatingExcluded):
             bExcluded = True
@@ -108,8 +103,7 @@ def CheckAndSubmit(Manual=False):
         
         Debug("Title: " + title)
         
-        if ((title != "" and lasttitle != title) and not bExcluded):                
-            get_id(sType)
+        if ((title != "" and lasttitle != title) and not bExcluded):
             
             if (iPercComp > (float(VideoThreshold) / 100)):
                 Debug('Title: ' + title + ', sending watched status, current percentage: ' + str(iPercComp), True)
@@ -128,36 +122,6 @@ def CheckAndSubmit(Manual=False):
         Debug('Resetting last update timestamp')
         lastUpdate = 0
         sleepTime = 15
-        getID = True
-
-
-def get_id(video_type):
-    global getID
-    global video_id
-    
-    getID = False
-    Debug("Looking up video ID (tvdb or imdb)", False)
-    
-    if video_type == "Movie":
-        try:
-            query = "select case when not movie.c09 is null then movie.c09 else 'NOTFOUND' end as [MovieID] from movie where movie.c00 = '" + xbmc.getInfoLabel("VideoPlayer.Title") + "' limit 1"
-            res = xbmc.executehttpapi("queryvideodatabase(" + query + ")")
-            movieid = re.findall('>(.*?)<',res) # find it
-            if len(movieid[1].strip()) >= 1:
-                video_id = str(movieid[1].strip())
-        except:
-            video_id = ""
-            
-    elif video_type == "TVShow":
-        try:
-            query = "select c12 from tvshow where c00 = '" + xbmc.getInfoLabel("VideoPlayer.TvShowTitle") + "'"
-            res = xbmc.executehttpapi("queryvideodatabase(" + query + ")")
-            tvid = re.findall('[\d.]*\d+',res) # find it
-
-            if len(tvid[0].strip()) >= 1:
-                video_id = tvid[0].strip();
-        except:
-            video_id = ""
 
 
 ###Settings related parsing
@@ -186,7 +150,6 @@ bPassword = False
 lasttitle = ""
 lastUpdate = 0
 video_id = ""
-getID = True
 sleepTime = 168
 checkTitle = ''
 

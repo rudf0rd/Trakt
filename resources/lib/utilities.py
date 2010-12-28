@@ -49,14 +49,16 @@ def SendUpdate(info, progress, sType, status):
     if (sType == "TVShow"):
         ID = getID(sType, unicode(xbmc.getInfoLabel("VideoPlayer.TvShowTitle"), 'utf-8'))
     elif (sType == "Movie"):
-        ID = getID(sType, unicode(xbmc.getInfoLabel("VideoPlayer.Title")))
+        ID = getID(sType, unicode(xbmc.getInfoLabel("VideoPlayer.Title"), 'utf-8')) 
+    
+    Debug("IMDB/tvdb id: "+ID);
     
     # split on type and create data packet for each type
     if (sType == "Movie"):
         Debug("Parsing Movie", False)
         
         # format: title, year
-        title, year, ID = info.split(",")
+        title, year = info.split(",")
         
         # check to make sure the data is there
         # otherwise return
@@ -85,7 +87,7 @@ def SendUpdate(info, progress, sType, status):
         Debug("Parsing TVShow", False)
         
         # format: title, year, season, episode
-        title, year, season, episode, ID = info.split(",")
+        title, year, season, episode = info.split(",")
         
         # check to make sure the data is there
         # otherwise return
@@ -242,7 +244,7 @@ def getID(sType, title):
             video_id = ""
     else:
         try:
-            query = "select case when not movie.c09 is null then movie.c09 else 'NOTFOUND' end as [MovieID] from movie where movie.c00 = '" + title + "' limit 1"
+            query = "select movie.c09 from movie where movie.c00 = '" + title + "' limit 1"
             res = xbmc.executehttpapi("queryvideodatabase(" + query + ")")
             movieid = re.findall('>(.*?)<',res) # find it
             if len(movieid[1].strip()) >= 1:
