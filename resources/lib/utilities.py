@@ -249,13 +249,10 @@ def getID(sType, title):
             Debug(query)
             res = xbmc.executehttpapi("queryvideodatabase(" + query + ")")
             Debug(res)
-            movieid = re.findall('>(.*?)<',res) # find it
-            Debug("reg 0: "+str(movieid[0]))
+            movieid = re.findall('<field>(.*?)</field>',res) # find it
 
-            print repr(len(movieid[0]))
-
-            if len(movieid[0]) >= 1:
-                Debug("reg 0: "+str(movieid[0]))
+            if len(str(movieid[0])) >= 1:
+                Debug("Final answer (for id!) --> "+str(movieid[0]))
                 video_id = str(movieid[0])
         except:
             video_id = ""
