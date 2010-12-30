@@ -1,6 +1,7 @@
 Version 0.1
 	- added Spanish translation thanks to MaDDoGo!
 	- removed check for year since the year is missing if you start a tv show/movie in certain manners (ex: android xbmc remote)
+	- added urlencoding for httpapi query and removed redundant check for tmdb/imdb id
 
 Version 0.0.9
 	- adjusted time intervals to be more aggressive if video is not playing
