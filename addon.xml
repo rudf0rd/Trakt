@@ -6,9 +6,6 @@
   <requires>
     <import addon="xbmc.python" version="1.0"/>
   </requires>
-  <extension point="xbmc.service"
-             library="default.py">
-  </extension>
   <extension point="xbmc.python.script"
              library="default.py" />
   <extension point="xbmc.addon.metadata">
